@@ -63,7 +63,7 @@ export function WorkGrid({
             transition={{ duration: 0.6, delay: 0.1 * index }}
           >
             <Link
-              href={`/work/${project.slug.current}`}
+              href={`/${project.slug.current}`}
               className="group block cursor-none"
               onMouseEnter={() => {
                 setHoveredId(project._id)

@@ -62,7 +62,7 @@ export function ImageSlideshow({ images, interval = 3000 }: ImageSlideshowProps)
         <AnimatePresence mode="wait">
           {currentImage.linkedProjectSlug ? (
             <Link
-              href={`/work/${currentImage.linkedProjectSlug}`}
+              href={`/${currentImage.linkedProjectSlug}`}
               className="block w-full h-full cursor-pointer hover:opacity-90 transition-opacity"
               title={currentImage.linkedProjectTitle || 'View project'}
             >
