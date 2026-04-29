@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siddharth Kothiyal - Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333333;
+            overflow-x: hidden;
+        }
+
+        /* Main Layout */
+        .container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        /* Header Navigation */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .intro {
+            max-width: 600px;
+        }
+
+        .intro h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 600;
+            line-height: 1.2;
+            color: #333333;
+            margin-bottom: 0.5rem;
+        }
+
+        .intro .highlight {
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 4px;
+        }
+
+        .intro p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: #666666;
+            line-height: 1.4;
+        }
+
+        /* Navigation Menu */
+        .navigation {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #333333;
+            font-weight: 500;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: #666666;
+            transform: translateY(-2px);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #333333;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .content-left {
+            flex: 1;
+        }
+
+        .content-right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Device Illustration Placeholder */
+        .device-illustration {
+            width: 300px;
+            height: 400px;
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .device-content {
+            width: 80%;
+            height: 80%;
+            background: #f8f8f8;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #666666;
+        }
+
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 2rem;
+            font-size: 0.9rem;
+            color: #666666;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .heart {
+            color: #ff6b6b;
+            font-size: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 2rem;
+                align-items: stretch;
+            }
+
+            .navigation {
+                justify-content: space-between;
+                gap: 1rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+            }
+
+            .main-content {
+                flex-direction: column;
+                gap: 3rem;
+                text-align: center;
+            }
+
+            .device-illustration {
+                width: 250px;
+                height: 320px;
+            }
+
+            .footer {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="intro">
+                <h1>
+                    Hei! I am <span class="highlight">Siddharth</span>, a graphic designer 
+                    & interaction design student at AHO, Oslo
+                </h1>
+            </div>
+            
+            <nav class="navigation">
+                <a href="blink.html" class="nav-link">Thesis</a>
+                <a href="work.html" class="nav-link">Work</a>
+                <a href="play.html" class="nav-link">Play</a>
+                <a href="about.html" class="nav-link">About</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-left">
+                <!-- Additional content can go here -->
+            </div>
+            
+            <div class="content-right">
+                <div class="device-illustration">
+                    <div class="device-content">
+                        <!-- Placeholder for device/illustration -->
+                        <span>Design Preview</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-left">
+                Copyright © 2024 Siddharth Kothiyal
+            </div>
+            <div class="footer-right">
+                Made with <span class="heart">♥</span> in Oslo
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Simple navigation hover effects
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "portfolio-2025",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@react-three/fiber": "^9.4.0",
+    "@react-three/postprocessing": "^3.0.4",
+    "gsap": "^3.13.0",
+    "postprocessing": "^6.37.8",
+    "three": "^0.180.0"
+  }
+}

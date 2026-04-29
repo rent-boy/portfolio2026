@@ -1,0 +1,27 @@
+{
+  "name": "studio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "sanity dev",
+    "start": "sanity start",
+    "build": "sanity build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@sanity/orderable-document-list": "^1.4.0",
+    "@sanity/vision": "^4.12.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-is": "^19.2.0",
+    "sanity": "^4.12.0",
+    "styled-components": "^6.1.19"
+  },
+  "devDependencies": {
+    "@sanity/types": "^4.12.0",
+    "typescript": "^5.9.3"
+  }
+}
