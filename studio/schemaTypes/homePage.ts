@@ -27,6 +27,25 @@ export default defineType({
       description: 'Bio paragraph displayed next to the profile image on the landing page',
     },
     {
+      name: 'experienceEntries',
+      title: 'Experience',
+      type: 'array',
+      description: 'Work experience rows shown below the bio text on the landing page (year, company, role)',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'year', title: 'Year', type: 'string' },
+            { name: 'company', title: 'Company', type: 'string' },
+            { name: 'role', title: 'Role', type: 'string' },
+          ],
+          preview: {
+            select: { title: 'company', subtitle: 'role' },
+          },
+        },
+      ],
+    },
+    {
       name: 'cursorMedia',
       title: 'Cursor Media (landing hover effect)',
       type: 'array',

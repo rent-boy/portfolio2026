@@ -14,6 +14,7 @@ export default async function Home() {
 
   const heroText: string = homePage?.heroText || ""
   const profileImageUrl: string = homePage?.profileImageUrl || ""
+  const experienceEntries = homePage?.experienceEntries ?? []
 
   return (
     <div className="bg-white">
@@ -30,7 +31,7 @@ export default async function Home() {
       </div>
 
       {/* Work section — scrolls in below the hero, BottomBar passed as child so it shares the hover color */}
-      <WorkFilterSection projects={projects} profileImageUrl={profileImageUrl} heroText={heroText}>
+      <WorkFilterSection projects={projects} profileImageUrl={profileImageUrl} heroText={heroText} experienceEntries={experienceEntries}>
         <BottomBar />
       </WorkFilterSection>
     </div>

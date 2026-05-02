@@ -11,7 +11,7 @@ function ViewChip({ x, y }: { x: number; y: number }) {
       className="fixed pointer-events-none z-50"
       style={{ left: x + 16, top: y - 12, transform: "translateY(-50%)" }}
     >
-      <span className="bg-white text-gray-900 text-xs font-normal px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap font-[family-name:var(--font-funnel-sans)]">
+      <span className="bg-[#FF00FF] text-white text-xs font-normal px-3 py-1.5 rounded-full whitespace-nowrap font-[family-name:var(--font-funnel-sans)]">
         👁️ View project
       </span>
     </div>
@@ -53,7 +53,7 @@ export function WorkGrid({
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+        className="grid grid-cols-1 md:grid-cols-2 gap-[25.6px]"
       >
         {projects.map((project, index) => (
           <motion.div
@@ -75,7 +75,7 @@ export function WorkGrid({
               }}
             >
               {/* Project Image/Video - 16:9 aspect ratio */}
-              <div className="aspect-video bg-gray-200 mb-4 overflow-hidden rounded-lg">
+              <div className="aspect-video bg-gray-200 mb-[10px] overflow-hidden">
                 {project.thumbnailVideo ? (
                   <video
                     src={project.thumbnailVideo}
@@ -99,9 +99,9 @@ export function WorkGrid({
               </div>
               
               {/* Project Info */}
-              <div className="space-y-1">
+              <div className="flex flex-col gap-0.5 md:flex-row md:items-baseline md:justify-between md:gap-4 mt-[10px]">
                 <h3
-                  className="text-2xl font-normal transition-colors font-[family-name:var(--font-funnel-display)]"
+                  className="text-[20px] font-normal transition-colors font-[family-name:var(--font-funnel-display)]"
                   style={{
                     color: hoveredId === project._id && project.thumbnailColor && !isGreyOrBlack(project.thumbnailColor)
                       ? project.thumbnailColor
@@ -110,7 +110,7 @@ export function WorkGrid({
                 >
                   {project.title}
                 </h3>
-                <p className="text-base text-gray-500 font-normal font-[family-name:var(--font-bitter)]">
+                <p className="text-[16px] text-gray-500 font-normal font-[family-name:var(--font-bitter)] md:text-right">
                   {project.subtitle}
                 </p>
               </div>

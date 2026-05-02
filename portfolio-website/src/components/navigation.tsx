@@ -12,7 +12,7 @@ const accentStyle = { color: 'var(--project-accent, #111827)' }
 
 export function Navigation() {
   return (
-    <nav>
+    <nav className="border-b" style={{ borderBottomColor: 'color-mix(in srgb, var(--project-accent, transparent) 20%, transparent)' }}>
       <div className="max-w-full mx-auto px-6 py-4">
         {/* Mobile */}
         <div className="flex flex-col gap-1 md:hidden">

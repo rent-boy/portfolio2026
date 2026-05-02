@@ -90,7 +90,7 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
 
   return (
     <aside>
-      <nav className="flex flex-col space-y-6 max-w-[200px]">
+      <nav className="flex flex-col space-y-6 pl-4">
         {/* Back Button */}
         {showBackButton && (
           <motion.button
@@ -108,7 +108,7 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="text-xs font-normal tracking-wide font-[family-name:var(--font-funnel-sans)] uppercase">Back</span>
+            <span className="text-[16px] font-normal tracking-wide font-[family-name:var(--font-funnel-sans)] uppercase">Back</span>
           </motion.button>
         )}
 
@@ -117,7 +117,7 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="flex flex-col space-y-3"
+          className="flex flex-col space-y-[9.6px]"
         >
           {items.map((item, index) => {
             const isActive = activeId === item.id
@@ -132,22 +132,24 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
                 onClick={() => scrollToSection(item.id)}
                 className={`
                   text-left transition-all duration-200 hover:text-gray-900 
-                  ${indent} text-sm ${isActive ? 'font-normal' : 'font-light'}
+                  ${indent} text-lg ${isActive ? 'font-normal' : 'font-light'}
                   font-[family-name:var(--font-funnel-sans)]
                   relative leading-relaxed
                 `}
-                style={{ color: isActive ? 'var(--project-accent, #111827)' : '#9ca3af' }}
+                style={{ color: isActive ? 'var(--project-accent, #111827)' : 'rgba(75, 85, 99, 0.6)' }}
               >
                 {/* Active Indicator */}
                 {isActive && (
-                  <motion.div
+                  <motion.span
                     layoutId="activeIndicator"
-                    className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
-                    style={{ backgroundColor: 'var(--project-accent, #111827)' }}
+                    className="absolute -left-5 top-1/2 -translate-y-1/2 text-[18px] font-bold leading-none select-none"
+                    style={{ color: 'var(--project-accent, #111827)' }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.2 }}
-                  />
+                  >
+                    ✻
+                  </motion.span>
                 )}
                 <span className="line-clamp-2">{item.title || item.heading}</span>
               </motion.button>

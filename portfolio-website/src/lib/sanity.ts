@@ -158,7 +158,12 @@ export async function getHomePage() {
     introText,
     navigationTabs,
     heroText,
-    "profileImageUrl": profileImage.asset->url
+    "profileImageUrl": profileImage.asset->url,
+    experienceEntries[] {
+      year,
+      company,
+      role
+    }
   }`
 
   return await client.fetch(query)

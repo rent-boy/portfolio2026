@@ -12,7 +12,7 @@ import { FullscreenModal } from './fullscreen-modal'
 const portableTextComponents = {
   block: {
     normal: ({ children }: any) => (
-      <p className="text-lg font-light text-gray-500 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
+      <p className="text-lg font-light text-gray-600/90 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
         {children}
       </p>
     ),
@@ -44,12 +44,12 @@ const portableTextComponents = {
   },
   list: {
     bullet: ({ children }: any) => (
-      <ul className="list-disc list-inside space-y-2 text-lg font-light text-gray-500 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
+      <ul className="list-disc list-inside space-y-2 text-lg font-light text-gray-600/90 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
         {children}
       </ul>
     ),
     number: ({ children }: any) => (
-      <ol className="list-decimal list-inside space-y-2 text-lg font-light text-gray-500 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
+      <ol className="list-decimal list-inside space-y-2 text-lg font-light text-gray-600/90 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
         {children}
       </ol>
     ),
@@ -692,12 +692,12 @@ export function ProjectContent({ project }: ProjectContentProps) {
               </h3>
             )}
             {block.heading1 && (
-              <h4 className="text-[1.368rem] font-medium text-gray-800 font-[family-name:var(--font-bitter)]">
+              <h4 className="text-[1.368rem] font-medium font-[family-name:var(--font-bitter)]" style={{ color: 'var(--project-accent, #111827)' }}>
                 {block.heading1}
               </h4>
             )}
             {block.heading2 && (
-              <h5 className="text-2xl font-normal text-gray-700 font-[family-name:var(--font-instrument-serif)]">
+              <h5 className="text-[20px] font-normal font-[family-name:var(--font-funnel-display)]" style={{ color: 'var(--project-accent, #111827)' }}>
                 {block.heading2}
               </h5>
             )}
@@ -804,112 +804,125 @@ export function ProjectContent({ project }: ProjectContentProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Main Content */}
-      <div className="px-6 md:px-40 lg:px-64 xl:px-80 2xl:px-96 py-12">
-      {/* Side Navigation - Positioned in margin with sticky behavior */}
-      {navItems.length > 0 && (
-        <div className="hidden lg:block float-left -ml-[240px] w-[200px] sticky top-6">
-          <SideNavigation items={navItems} showBackButton={true} backUrl="/" />
-        </div>
-      )}
-      
-      {/* Cover Image/Video - Full Width across 4 columns */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="mb-8"
-      >
-        <div className="w-full bg-gray-200 flex items-center justify-center overflow-hidden rounded-lg">
-          {project.coverVideo ? (
-            <video 
-              src={project.coverVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto object-contain"
-            />
-          ) : project.coverImage ? (
-            <img 
-              src={project.coverImage} 
-              alt={project.title}
-              className="w-full h-auto object-contain"
-            />
-          ) : (
-            <div className="w-full aspect-[2.5/1] flex items-center justify-center text-gray-500">
-              Cover Image/Video
+      <div className="py-12 px-6">
+        <div className="lg:flex">
+
+          {/* Side Navigation — sticky left column */}
+          {navItems.length > 0 && (
+            <div className="hidden lg:block flex-shrink-0 lg:w-[14.5rem] xl:w-[18.5rem] 2xl:w-[22.5rem]">
+              <div className="sticky top-6 self-start lg:w-[13rem] xl:w-[17rem] 2xl:w-[21rem]">
+                <SideNavigation items={navItems} showBackButton={true} backUrl="/" />
+              </div>
             </div>
           )}
-        </div>
-      </motion.div>
 
-      {/* Content Grid - 4 columns (includes title and all content blocks) */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-8"
-      >
-        {/* Title - Full Width 4 Columns */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-4 md:col-span-4"
-        >
-          <h1 className="text-4xl font-semibold text-gray-900 font-[family-name:var(--font-funnel-display)]">
-            {project.title}
-          </h1>
-        </motion.div>
+          {/* Main content column */}
+          <div className="flex-1 md:px-[136px] lg:px-0 lg:pr-[14.5rem] xl:pr-[18.5rem] 2xl:pr-[22.5rem]">
 
-        {/* Flexible Content Blocks - flow left to right, top to bottom */}
-        {project.contentBlocks && project.contentBlocks.length > 0 && 
-          project.contentBlocks.map((block, index) => (
-            <React.Fragment key={block._key}>
-              {renderContentBlock(block, index + 1)}
-            </React.Fragment>
-          ))
-        }
-      </motion.div>
+            {/* Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-8"
+            >
+              {project.subtitle && (
+                <p className="text-[16px] text-gray-500 font-normal font-[family-name:var(--font-bitter)] mb-2">
+                  {project.subtitle}
+                </p>
+              )}
+              <h1 className="text-4xl font-semibold text-gray-900 font-[family-name:var(--font-funnel-display)]">
+                {project.title}
+              </h1>
+            </motion.div>
 
-      {/* Project Link */}
-      {(project.projectLink || project.projectUrl) && (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-8 text-center"
-        >
-          <a 
-            href={project.projectLink || project.projectUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block px-8 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            View Live Project →
-          </a>
-        </motion.div>
-      )}
+            {/* Cover Image/Video */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="mb-8"
+            >
+              <div className="w-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                {project.coverVideo ? (
+                  <video
+                    src={project.coverVideo}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-auto object-contain"
+                  />
+                ) : project.coverImage ? (
+                  <img
+                    src={project.coverImage}
+                    alt={project.title}
+                    className="w-full h-auto object-contain"
+                  />
+                ) : (
+                  <div className="w-full aspect-[2.5/1] flex items-center justify-center text-gray-500">
+                    Cover Image/Video
+                  </div>
+                )}
+              </div>
+            </motion.div>
 
-      {/* Google Drive Video Embed */}
-      {project.googleDriveVideoUrl && (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-12"
-        >
-          <div className="w-full aspect-video bg-gray-200 rounded-lg overflow-hidden">
-            <iframe
-              src={project.googleDriveVideoUrl.replace('/view', '/preview')}
-              className="w-full h-full"
-              allow="autoplay"
-              allowFullScreen
-            />
+            {/* Content Grid - 4 columns */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-4 gap-8"
+            >
+              {project.contentBlocks && project.contentBlocks.length > 0 &&
+                project.contentBlocks.map((block, index) => (
+                  <React.Fragment key={block._key}>
+                    {renderContentBlock(block, index + 1)}
+                  </React.Fragment>
+                ))
+              }
+            </motion.div>
+
+            {/* Project Link */}
+            {(project.projectLink || project.projectUrl) && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="mt-8 text-center"
+              >
+                <a
+                  href={project.projectLink || project.projectUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-8 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  View Live Project →
+                </a>
+              </motion.div>
+            )}
+
+            {/* Google Drive Video Embed */}
+            {project.googleDriveVideoUrl && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+                className="mt-12"
+              >
+                <div className="w-full aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                  <iframe
+                    src={project.googleDriveVideoUrl.replace('/view', '/preview')}
+                    className="w-full h-full"
+                    allow="autoplay"
+                    allowFullScreen
+                  />
+                </div>
+              </motion.div>
+            )}
+
           </div>
-        </motion.div>
-      )}
+        </div>
       </div>
     </div>
   )

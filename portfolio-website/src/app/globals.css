@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+html, *, *:hover, *:focus, *:active { cursor: none !important; }
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

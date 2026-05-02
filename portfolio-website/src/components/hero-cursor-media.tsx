@@ -132,7 +132,7 @@ export function HeroCursorMedia({ media }: HeroCursorMediaProps) {
           <div className="relative">
             <MediaEl item={media[cursorIndex % media.length]} style={followerStyle} />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <span className="bg-white text-gray-900 text-[14.4px] font-normal px-[14.4px] py-[7.2px] rounded-full border border-gray-200 shadow-sm whitespace-nowrap font-[family-name:var(--font-funnel-sans)]">
+              <span className="bg-[#FF00FF] text-white text-[14.4px] font-normal px-[14.4px] py-[7.2px] rounded-full whitespace-nowrap font-[family-name:var(--font-funnel-sans)]">
                 {media[cursorIndex % media.length].chipLabel || DEFAULT_CHIP_LABEL}
               </span>
             </div>

@@ -37,21 +37,6 @@ export default defineType({
       initialValue: true,
     },
     {
-      name: 'period',
-      title: 'Time Period',
-      type: 'string',
-      description: 'Which period filter this project appears under on the landing page',
-      options: {
-        list: [
-          {title: '2024–26', value: '2024-26'},
-          {title: '2022–24', value: '2022-24'},
-          {title: '2019–22', value: '2019-22'},
-          {title: '2015–19', value: '2015-19'},
-        ],
-        layout: 'radio',
-      },
-    },
-    {
       name: 'featuredImage',
       title: 'Featured Image',
       type: 'image',

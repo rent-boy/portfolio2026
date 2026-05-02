@@ -8,6 +8,7 @@ import { Bitter } from "next/font/google"
 import { Instrument_Serif } from "next/font/google"
 import { Inter_Tight } from "next/font/google"
 import { Funnel_Display } from "next/font/google"
+import { CustomCursor } from "@/components/custom-cursor"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -89,6 +90,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} ${spectral.variable} ${libreBaskerville.variable} ${libreBaskervilleRegular.variable} ${spaceMono.variable} ${funnelSans.variable} ${bitter.variable} ${instrumentSerif.variable} ${interTight.variable} ${funnelDisplay.variable}`} suppressHydrationWarning>
+        <CustomCursor />
         {children}
       </body>
     </html>
