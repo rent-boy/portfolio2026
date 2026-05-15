@@ -176,7 +176,9 @@ export async function getSiteSettings() {
     cvButtonUrl,
     linkedInUrl,
     linkedInButtonText,
-    bottomBarText
+    bottomBarText,
+    ogTitle,
+    "ogImageUrl": ogImage.asset->url
   }`
   return await client.fetch(query)
 }

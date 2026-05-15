@@ -35,6 +35,19 @@ export default defineType({
       initialValue: 'LinkedIn',
     },
     {
+      name: 'ogTitle',
+      title: 'Link Preview Title',
+      type: 'string',
+      description: 'Headline shown when the site is shared as a link (iMessage, LinkedIn, Twitter etc.)',
+    },
+    {
+      name: 'ogImage',
+      title: 'Link Preview Image (recommended: 1200×630px)',
+      type: 'image',
+      description: 'Image shown in link previews. Upload at 1200×630px for best results across all platforms.',
+      options: { hotspot: true },
+    },
+    {
       name: 'bottomBarText',
       title: 'Bottom Bar Text',
       type: 'text',

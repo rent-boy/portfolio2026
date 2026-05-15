@@ -1,4 +1,3 @@
-import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Spectral } from "next/font/google"
 import { Libre_Baskerville } from "next/font/google"
@@ -9,6 +8,9 @@ import { Instrument_Serif } from "next/font/google"
 import { Inter_Tight } from "next/font/google"
 import { Funnel_Display } from "next/font/google"
 import { CustomCursor } from "@/components/custom-cursor"
+import { FaviconController } from "@/components/favicon-controller"
+import { getSiteSettings } from "@/lib/sanity"
+import type { Metadata } from "next"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -64,22 +66,27 @@ const funnelDisplay = Funnel_Display({
   variable: "--font-funnel-display"
 })
 
-export const metadata: Metadata = {
-  title: "Siddharth Kothiyal - Design Portfolio",
-  description: "I design digital products using AI",
-  openGraph: {
-    title: "Siddharth Kothiyal - Design Portfolio",
-    description: "I design digital products using AI",
-    url: "https://www.sidkoths.com",
-    siteName: "Siddharth Kothiyal Portfolio",
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Siddharth Kothiyal - Design Portfolio",
-    description: "I design digital products using AI",
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings()
+  const title = settings?.ogTitle || "Siddharth Kothiyal - Design Portfolio"
+  const images = settings?.ogImageUrl ? [{ url: settings.ogImageUrl, width: 1200, height: 630 }] : []
+
+  return {
+    title,
+    openGraph: {
+      title,
+      url: "https://www.sidkoths.com",
+      siteName: "Siddharth Kothiyal Portfolio",
+      locale: "en_US",
+      type: "website",
+      ...(images.length && { images }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      ...(images.length && { images }),
+    },
+  }
 }
 
 export default function RootLayout({
@@ -91,6 +98,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} ${spectral.variable} ${libreBaskerville.variable} ${libreBaskervilleRegular.variable} ${spaceMono.variable} ${funnelSans.variable} ${bitter.variable} ${instrumentSerif.variable} ${interTight.variable} ${funnelDisplay.variable}`} suppressHydrationWarning>
         <CustomCursor />
+        <FaviconController />
         {children}
       </body>
     </html>

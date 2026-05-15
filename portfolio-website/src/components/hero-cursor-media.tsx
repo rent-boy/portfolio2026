@@ -21,7 +21,7 @@ interface HookedItem {
 
 function MediaEl({ item, style }: { item: CursorMediaItem; style: React.CSSProperties }) {
   const isVideo = item.mimeType?.startsWith("video/")
-  const mediaStyle: React.CSSProperties = { maxWidth: "60vw", maxHeight: "60vh", display: "block" }
+  const mediaStyle: React.CSSProperties = { maxWidth: "48vw", maxHeight: "48vh", display: "block" }
   return isVideo ? (
     <video key={item.url} src={item.url} autoPlay loop muted playsInline style={mediaStyle} />
   ) : (
