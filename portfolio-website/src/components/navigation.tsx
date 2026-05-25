@@ -1,33 +1,72 @@
-"use client"
-
 import Link from "next/link"
+import { MovingClock } from "@/components/moving-clock"
+import { MobileNavClock } from "@/components/mobile-nav-clock"
+import { getSiteSettings } from "@/lib/sanity"
 
-const NAME  = "Siddharth Kothiyal"
-const LOCATION = "Oslo"
-const EMAIL = "siddharthkothiyal05@gmail.com"
+const cls = "font-[family-name:var(--font-geist-mono)] font-normal text-[10px] md:text-[14px] uppercase tracking-[0.8px] text-[#1e1e1e] whitespace-nowrap"
+const sep = <span className={cls}>✻</span>
 
-const nameCls = "text-[24px] font-medium font-[family-name:var(--font-funnel-display)]"
-const metaCls = "text-[24px] font-normal font-[family-name:var(--font-funnel-display)]"
-const accentStyle = { color: 'var(--project-accent, #111827)' }
+export async function Navigation() {
+  const settings = await getSiteSettings()
+  const linkedInUrl = settings?.linkedInUrl || "#"
+  const email = "mailto:siddharthkothiyal05@gmail.com"
+  const resumeUrl = settings?.cvButtonUrl || "#"
 
-export function Navigation() {
   return (
-    <nav className="border-b" style={{ borderBottomColor: 'color-mix(in srgb, var(--project-accent, transparent) 20%, transparent)' }}>
-      <div className="max-w-full mx-auto px-6 py-4">
-        {/* Mobile */}
-        <div className="flex flex-col gap-1 md:hidden">
-          <Link href="/" className={nameCls} style={accentStyle}>{NAME}</Link>
-          <span className={metaCls} style={accentStyle}>{LOCATION}</span>
-          <a href={`mailto:${EMAIL}`} className="text-[20px] font-normal font-[family-name:var(--font-funnel-display)]" style={accentStyle}>{EMAIL}</a>
+    <nav
+      className="sticky top-0 z-50 relative"
+      style={{ backgroundColor: 'var(--tile-hover-bg, #ffffff)', transition: 'background-color 0.4s ease' }}
+    >
+      {/* Row 1: Name + track/clock */}
+      <div className="flex items-center px-[12px] py-3 md:px-5 md:py-[18px] relative">
+        {/* Name — z-10 so it stays above the mobile clock */}
+        <Link
+          href="/"
+          data-nav-name
+          className={`${cls} relative z-10 pr-1 md:pr-0`}
+          style={{ backgroundColor: 'var(--tile-hover-bg, #ffffff)', transition: 'background-color 0.4s ease' }}
+        >
+          Siddharth Kothiyal
+        </Link>
+
+        {/* Desktop: inner track with moving clock */}
+        <div className="hidden md:flex flex-1 relative self-stretch items-center mx-4">
+          <div className="absolute inset-x-0 top-1/2 h-px bg-[#1e1e1e]" />
+          <MovingClock />
+        </div>
+        <div className={`hidden md:flex items-center gap-3 ${cls}`}>
+          <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">LinkedIn</a>
+          {sep}
+          <a href={email} className="hover:opacity-60 transition-opacity">Email</a>
+          {sep}
+          <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">Resume</a>
         </div>
 
-        {/* Desktop */}
-        <div className="hidden md:flex justify-between items-baseline">
-          <Link href="/" className={nameCls} style={accentStyle}>{NAME}</Link>
-          <span className={metaCls} style={accentStyle}>{LOCATION}</span>
-          <a href={`mailto:${EMAIL}`} className={metaCls} style={accentStyle}>{EMAIL}</a>
+        {/* Mobile row 1 line — tagged for MobileNavClock (segment 0: 00:00–08:00) */}
+        <div className="md:hidden absolute inset-x-[12px] top-0 bottom-0" aria-hidden>
+          <div className="absolute inset-x-0 top-1/2 h-px bg-[#1e1e1e]" data-mobile-line="1" />
         </div>
       </div>
+
+      {/* Mobile only: separator + links row */}
+      <div className="md:hidden">
+        {/* Segment 1 line: 08:00–16:00 */}
+        <div className="h-px bg-[#1e1e1e] mx-[12px]" data-mobile-line="2" />
+        <div className="flex items-center px-[12px] py-3">
+          {/* Segment 2 line: 16:00–24:00 */}
+          <div className="h-px bg-[#1e1e1e] flex-1 mr-2" data-mobile-line="3" />
+          <div className={`flex items-center gap-2 ${cls}`}>
+            <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">LinkedIn</a>
+            {sep}
+            <a href={email} className="hover:opacity-60 transition-opacity">Email</a>
+            {sep}
+            <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">Resume</a>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile clock — traverses all three row lines based on time of day */}
+      <MobileNavClock />
     </nav>
   )
 }
