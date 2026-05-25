@@ -140,22 +140,24 @@ function MobileExperienceBar({ entry }: { entry: ExperienceEntry }) {
 
 // Desktop: randomly placed, scaled-down pile. Single item fills tile height, no crop.
 function ProjectImagePile({ items }: { items: LandingMedia[] }) {
-  // Layout per item: position (top-left corner as % of container) + width + rotation + z-order
-  const [layouts] = useState<Array<{ left: number; top: number; width: number; height: number; z: number }>>(() => {
+  type Layout = { left: number; top: number; width: number; height: number; z: number }
+  const [layouts, setLayouts] = useState<Layout[] | null>(null)
+
+  useEffect(() => {
     const n = items.length
-    // Shuffle zones for horizontal spread; CMS order = z-index (first = back, last = front)
     const zones = items.map((_, i) => i)
     zones.sort(() => Math.random() - 0.5)
-    return items.map((_, i) => {
-      const itemW = 36 + Math.random() * 16  // 36–52 % of tile width
-      const itemH = 52 + Math.random() * 26  // 52–78 % of tile height
+    setLayouts(items.map((_, i) => {
+      const itemW = 36 + Math.random() * 16
+      const itemH = 52 + Math.random() * 26
       const zoneSpan = 95 / n
       const zoneStart = zones[i] * zoneSpan
       const left = Math.min(zoneStart + Math.random() * zoneSpan * 0.9, 100 - itemW)
       const top  = Math.random() * (100 - itemH)
       return { left, top, width: itemW, height: itemH, z: i }
-    })
-  })
+    }))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (items.length === 1) {
     const item = items[0]
@@ -175,7 +177,7 @@ function ProjectImagePile({ items }: { items: LandingMedia[] }) {
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {items.map((item, i) => {
+      {layouts && items.map((item, i) => {
         const { left, top, width, height, z } = layouts[i] ?? { left: 20, top: 20, width: 36, height: 55, z: i }
         const wrapStyle: React.CSSProperties = {
           position: 'absolute',
