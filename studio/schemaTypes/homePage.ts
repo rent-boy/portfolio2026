@@ -30,7 +30,7 @@ export default defineType({
       name: 'experienceEntries',
       title: 'Experience',
       type: 'array',
-      description: 'Work experience rows shown below the bio text on the landing page (year, company, role)',
+      description: 'Work experience rows shown on the landing page (year, company, role). Projects can be assigned to a bar from within each Work Project.',
       of: [
         {
           type: 'object',

@@ -1,3 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-size="32" fill="#FF00FF" font-family="serif">✼</text>
+  <style>
+    text { fill: #1e1e1e; }
+    @media (prefers-color-scheme: dark) { text { fill: #ffffff; } }
+  </style>
+  <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-size="32" font-family="serif">✼</text>
 </svg>

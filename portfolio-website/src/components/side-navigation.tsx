@@ -8,16 +8,17 @@ interface NavItem {
   id: string
   title: string
   heading: string
-  level: 'title' | 'heading1' | 'heading2'
+  level: 'title' | 'heading' | 'subheading'
 }
 
 interface SideNavigationProps {
   items: NavItem[]
   showBackButton?: boolean
   backUrl?: string
+  scrollOffset?: number
 }
 
-export function SideNavigation({ items, showBackButton = true, backUrl = "/work" }: SideNavigationProps) {
+export function SideNavigation({ items, showBackButton = true, backUrl = "/work", scrollOffset = 80 }: SideNavigationProps) {
   const [activeId, setActiveId] = useState<string>("")
   const [isScrolling, setIsScrolling] = useState(false)
   const router = useRouter()
@@ -34,15 +35,12 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
 
       // Debounce scroll detection
       scrollTimeoutRef.current = setTimeout(() => {
-        const scrollPosition = window.scrollY + 100 // Offset for better UX
+        const scrollPosition = window.scrollY + scrollOffset
 
-        // Find the active section
         for (let i = items.length - 1; i >= 0; i--) {
           const element = document.getElementById(items[i].id)
           if (element) {
-            const { top } = element.getBoundingClientRect()
-            const absoluteTop = top + window.scrollY
-            
+            const absoluteTop = element.getBoundingClientRect().top + window.scrollY
             if (scrollPosition >= absoluteTop) {
               setActiveId(items[i].id)
               break
@@ -61,7 +59,7 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
         clearTimeout(scrollTimeoutRef.current)
       }
     }
-  }, [items, isScrolling])
+  }, [items, isScrolling, scrollOffset])
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
@@ -69,8 +67,7 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
       setIsScrolling(true)
       setActiveId(id)
 
-      const yOffset = -80 // Offset for better positioning
-      const y = element.getBoundingClientRect().top + window.scrollY + yOffset
+      const y = element.getBoundingClientRect().top + window.scrollY - scrollOffset
 
       window.scrollTo({
         top: y,
@@ -90,7 +87,7 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
 
   return (
     <aside>
-      <nav className="flex flex-col space-y-6 pl-4">
+      <nav className="flex flex-col space-y-6">
         {/* Back Button */}
         {showBackButton && (
           <motion.button
@@ -100,10 +97,10 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
             onClick={handleBackClick}
             className="flex items-center space-x-2 text-gray-400 hover:text-gray-900 transition-colors group"
           >
-            <svg 
-              className="w-4 h-4 transition-transform group-hover:-translate-x-1" 
-              fill="none" 
-              viewBox="0 0 24 24" 
+            <svg
+              className="w-4 h-4 transition-transform group-hover:-translate-x-1"
+              fill="none"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -113,49 +110,29 @@ export function SideNavigation({ items, showBackButton = true, backUrl = "/work"
         )}
 
         {/* Navigation Items */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="flex flex-col space-y-[9.6px]"
-        >
-          {items.map((item, index) => {
+        <div className="flex flex-col space-y-[9.6px]">
+          {items.map((item) => {
             const isActive = activeId === item.id
-            const indent = item.level === 'heading1' ? 'pl-3' : item.level === 'heading2' ? 'pl-6' : ''
 
             return (
-              <motion.button
+              <button
                 key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.05 * (index + 2) }}
                 onClick={() => scrollToSection(item.id)}
-                className={`
-                  text-left transition-all duration-200 hover:text-gray-900 
-                  ${indent} text-lg ${isActive ? 'font-normal' : 'font-light'}
-                  font-[family-name:var(--font-funnel-sans)]
-                  relative leading-relaxed
-                `}
-                style={{ color: isActive ? 'var(--project-accent, #111827)' : 'rgba(75, 85, 99, 0.6)' }}
+                className="text-left transition-colors duration-200"
+                style={{
+                  fontFamily: 'var(--font-geist-mono)',
+                  fontSize: '14px',
+                  fontWeight: 300,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.8px',
+                  color: isActive ? 'var(--project-accent, #1e1e1e)' : 'rgba(30,30,30,0.4)',
+                }}
               >
-                {/* Active Indicator */}
-                {isActive && (
-                  <motion.span
-                    layoutId="activeIndicator"
-                    className="absolute -left-5 top-1/2 -translate-y-1/2 text-[18px] font-bold leading-none select-none"
-                    style={{ color: 'var(--project-accent, #111827)' }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    ✻
-                  </motion.span>
-                )}
-                <span className="line-clamp-2">{item.title || item.heading}</span>
-              </motion.button>
+                {item.title || item.heading}
+              </button>
             )
           })}
-        </motion.div>
+        </div>
       </nav>
     </aside>
   )

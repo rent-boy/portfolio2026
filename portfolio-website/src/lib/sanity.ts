@@ -17,7 +17,7 @@ export function urlFor(source: any) {
 
 // Fetch all work projects
 export async function getWorkProjects() {
-  const query = `*[_type == "workProject" && !(_id in path("drafts.**")) && visible == true] | order(orderRank) {
+  const query = `*[_type == "workProject" && !(_id in path("drafts.**")) && visible != false] | order(orderRank) {
     _id,
     title,
     subtitle,
@@ -27,13 +27,18 @@ export async function getWorkProjects() {
     year,
     featured,
     visible,
+    isOpen,
     period,
-    "thumbnailImage": featuredImage.asset->url,
-    "thumbnailColor": featuredImage.asset->metadata.palette.darkVibrant.background,
-    "thumbnailLightColor": featuredImage.asset->metadata.palette.lightMuted.background,
+    "landingImages": landingImages[] { "url": asset->url, "mimeType": asset->mimeType },
+    "thumbnailImage": coverImage.asset->url,
+    "thumbnailColor": coverImage.asset->metadata.palette.darkVibrant.background,
+    "thumbnailLightColor": coverImage.asset->metadata.palette.lightMuted.background,
     "thumbnailVideo": thumbnailVideo.asset->url,
     "coverImage": coverImage.asset->url,
-    excerpt
+    excerpt,
+    assignedBar,
+    "hoverBgColor": hoverBgColor.hex,
+    "hoverAccentColor": hoverAccentColor.hex
   }`
   
   return await client.fetch(query)
@@ -46,91 +51,38 @@ export async function getWorkProjectBySlug(slug: string) {
     title,
     subtitle,
     slug,
-    "thumbnailImage": featuredImage.asset->url,
-    "thumbnailLightColor": featuredImage.asset->metadata.palette.lightMuted.background,
-    "thumbnailColor": featuredImage.asset->metadata.palette.darkVibrant.background,
+    isOpen,
+    "thumbnailImage": coverImage.asset->url,
+    "thumbnailLightColor": coverImage.asset->metadata.palette.lightMuted.background,
+    "thumbnailColor": coverImage.asset->metadata.palette.darkVibrant.background,
     "coverImage": coverImage.asset->url,
     "coverVideo": coverVideo.asset->url,
     contentBlocks[] {
       _type,
       _key,
-      // Image Block
-      _type == "imageBlock" => {
-        "imageUrl": image.asset->url,
+      title,
+      paragraph,
+      showInSideNav,
+      buttonLabel,
+      buttonUrl,
+      "media": media[] {
+        _key,
+        mediaType,
+        "url": select(mediaType == "image" => image.asset->url, mediaType == "video" => video.asset->url, null),
         "alt": image.alt,
         caption,
-        width,
-        buttonLabel,
-        buttonUrl,
-        roundCorners,
-        showBorder
-      },
-      // Video Block
-      _type == "videoBlock" => {
-        "videoUrl": video.asset->url,
-        caption,
-        width,
-        autoplay,
-        buttonLabel,
-        buttonUrl,
-        roundCorners,
-        showBorder
-      },
-      // Text Block
-      _type == "textBlock" => {
-        title,
-        titleEmail,
-        subtitle,
-        heading1,
-        heading2,
-        paragraph,
-        showInSidePanel,
-        width,
-        buttonLabel,
-        buttonUrl
-      },
-      // Empty Block
-      _type == "emptyBlock" => {
-        width
-      },
-      // Slideshow Block
-      _type == "slideshowBlock" => {
-        "items": items[] {
-          _type,
-          _type == "image" => {
-            "url": asset->url,
-            "type": "image"
-          },
-          _type == "file" => {
-            "url": asset->url,
-            "type": "video"
-          }
-        },
-        autoplay,
-        caption,
-        width,
-        buttonLabel,
-        buttonUrl,
-        roundCorners,
-        showBorder
-      },
-      // Line Separator Block
-      _type == "lineSeparatorBlock" => {
-        spacing
-      },
-      // Prototype Embed Block
-      _type == "prototypeEmbedBlock" => {
         prototypeUrl,
-        height,
-        width,
-        roundCorners,
-        showBorder,
-        showOpenButton
+        prototypeHeight,
       }
+    },
+    metadata[] {
+      label,
+      value
     },
     projectLink,
     projectUrl,
-    googleDriveVideoUrl
+    googleDriveVideoUrl,
+    "hoverBgColor": hoverBgColor.hex
   }`
   
   return await client.fetch(query, { slug })

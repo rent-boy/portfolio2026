@@ -7,6 +7,9 @@ import { Bitter } from "next/font/google"
 import { Instrument_Serif } from "next/font/google"
 import { Inter_Tight } from "next/font/google"
 import { Funnel_Display } from "next/font/google"
+import { Geist_Mono } from "next/font/google"
+import { Sora } from "next/font/google"
+import { DM_Sans } from "next/font/google"
 import { CustomCursor } from "@/components/custom-cursor"
 import { FaviconController } from "@/components/favicon-controller"
 import { getSiteSettings } from "@/lib/sanity"
@@ -65,6 +68,21 @@ const funnelDisplay = Funnel_Display({
   weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-funnel-display"
 })
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-geist-mono"
+})
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["300", "400", "600"],
+  variable: "--font-sora"
+})
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-dm-sans"
+})
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
@@ -96,7 +114,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} ${spectral.variable} ${libreBaskerville.variable} ${libreBaskervilleRegular.variable} ${spaceMono.variable} ${funnelSans.variable} ${bitter.variable} ${instrumentSerif.variable} ${interTight.variable} ${funnelDisplay.variable}`} suppressHydrationWarning>
+      <body className={`${inter.className} ${spectral.variable} ${libreBaskerville.variable} ${libreBaskervilleRegular.variable} ${spaceMono.variable} ${funnelSans.variable} ${bitter.variable} ${instrumentSerif.variable} ${interTight.variable} ${funnelDisplay.variable} ${geistMono.variable} ${sora.variable} ${dmSans.variable}`} suppressHydrationWarning>
         <CustomCursor />
         <FaviconController />
         {children}

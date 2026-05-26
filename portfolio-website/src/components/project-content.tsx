@@ -1,20 +1,54 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { useState, useMemo } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import React from "react"
 import Link from "next/link"
 import { PortableText } from '@portabletext/react'
 import { SideNavigation } from './side-navigation'
 import { FullscreenModal } from './fullscreen-modal'
 
-// Custom components for PortableText rendering
-const portableTextComponents = {
+function DottedLine() {
+  return (
+    <div
+      style={{
+        flex: 1,
+        height: '1px',
+        backgroundImage:
+          'repeating-linear-gradient(to right, rgba(30,30,30,1) 0px, rgba(30,30,30,1) 1px, transparent 1px, transparent 3px)',
+      }}
+    />
+  )
+}
+
+const paragraphComponents = {
   block: {
     normal: ({ children }: any) => (
-      <p className="text-lg font-light text-gray-600/90 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
+      <p
+        style={{
+          fontSize: '18px',
+          fontFamily: 'var(--font-dm-sans)',
+          fontWeight: 300,
+          color: '#1e1e1e',
+          lineHeight: 1.7,
+        }}
+        className="mb-0"
+      >
         {children}
       </p>
+    ),
+    h4: ({ children }: any) => (
+      <h4
+        style={{
+          fontSize: '20px',
+          fontFamily: 'var(--font-sora)',
+          fontWeight: 600,
+          color: '#1e1e1e',
+          lineHeight: 1.3,
+        }}
+        className="mb-0 mt-2"
+      >
+        {children}
+      </h4>
     ),
   },
   marks: {
@@ -24,18 +58,17 @@ const portableTextComponents = {
     link: ({ children, value }: any) => {
       const href = value?.href || ''
       const isInternal = href.startsWith('/')
-      
       return isInternal ? (
-        <Link href={href} className="underline" style={{ color: '#FF00FF' }}>
+        <Link href={href} className="underline" style={{ color: 'var(--project-accent, #1e1e1e)' }}>
           {children}
         </Link>
       ) : (
-        <a 
-          href={href} 
-          target="_blank" 
+        <a
+          href={href}
+          target="_blank"
           rel="noopener noreferrer"
           className="underline"
-          style={{ color: '#FF00FF' }}
+          style={{ color: 'var(--project-accent, #1e1e1e)' }}
         >
           {children}
         </a>
@@ -44,887 +77,387 @@ const portableTextComponents = {
   },
   list: {
     bullet: ({ children }: any) => (
-      <ul className="list-disc list-inside space-y-2 text-lg font-light text-gray-600/90 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
-        {children}
-      </ul>
+      <ul className="list-disc list-outside mb-0 pl-5">{children}</ul>
     ),
     number: ({ children }: any) => (
-      <ol className="list-decimal list-inside space-y-2 text-lg font-light text-gray-600/90 leading-relaxed font-[family-name:var(--font-funnel-sans)] mb-4">
-        {children}
-      </ol>
+      <ol className="list-decimal list-outside mb-0 pl-5">{children}</ol>
     ),
   },
   listItem: {
-    bullet: ({ children }: any) => <li>{children}</li>,
-    number: ({ children }: any) => <li>{children}</li>,
+    bullet: ({ children }: any) => (
+      <li style={{ fontSize: '18px', fontFamily: 'var(--font-dm-sans)', fontWeight: 300, color: '#1e1e1e', lineHeight: 1.7 }}>{children}</li>
+    ),
+    number: ({ children, value }: any) => {
+      const firstSpan = value?.children?.[0]
+      const markerBold = firstSpan?.marks?.includes('strong')
+      return (
+        <li style={{ fontSize: '18px', fontFamily: 'var(--font-dm-sans)', fontWeight: markerBold ? 700 : 300, color: '#1e1e1e', lineHeight: 1.7 }}>
+          <span style={{ fontWeight: 300 }}>{children}</span>
+        </li>
+      )
+    },
   },
 }
 
-interface ContentBlock {
-  _type: string
-  _key: string
-  // Image Block
-  imageUrl?: string
-  alt?: string
-  caption?: string
-  width?: string
-  // Video Block
-  videoUrl?: string
-  autoplay?: boolean // Autoplay setting for video blocks and slideshows
-  // Text Block
-  title?: string
-  titleEmail?: string
-  subtitle?: string
-  heading1?: string
-  heading2?: string
-  paragraph?: any // Portable Text array
-  showInSidePanel?: boolean
-  // Slideshow Block
-  images?: string[]
-  items?: any[] // Media items (images/videos)
-  // Line Separator Block
-  spacing?: string
-  // Prototype Embed Block
-  prototypeUrl?: string
-  height?: number
-  showOpenButton?: boolean
-  // Button (available in all blocks)
-  buttonLabel?: string
-  buttonUrl?: string
-  // Round Corners (available in image, video, slideshow blocks)
-  roundCorners?: boolean
-  // Show Border (available in image, video, slideshow, prototype blocks)
-  showBorder?: boolean
-}
-
-interface ProjectContentProps {
-  project: {
-    title: string
-    subtitle: string
-    coverImage?: string
-    coverVideo?: string
-    contentBlocks?: ContentBlock[]
-    projectLink?: string
-    projectUrl?: string
-    googleDriveVideoUrl?: string
-  }
-}
-
-// Helper function to render button
 function BlockButton({ buttonLabel, buttonUrl }: { buttonLabel?: string; buttonUrl?: string }) {
   if (!buttonLabel || !buttonUrl) return null
-
   const isExternal = buttonUrl.startsWith('http://') || buttonUrl.startsWith('https://')
-
+  const cls =
+    'inline-block mt-4 px-5 py-2 text-[13px] font-[family-name:var(--font-geist-mono)] tracking-[0.8px] uppercase border border-[#1e1e1e] hover:bg-[#1e1e1e] hover:text-white transition-colors'
   if (isExternal) {
     return (
-      <a
-        href={buttonUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-block mt-4 px-6 py-2 bg-gray-100 text-gray-900 rounded-md hover:bg-gray-200 transition-colors duration-200"
-      >
+      <a href={buttonUrl} target="_blank" rel="noopener noreferrer" className={cls}>
         {buttonLabel}
       </a>
     )
   }
-
   return (
-    <Link
-      href={buttonUrl}
-      className="inline-block mt-4 px-6 py-2 bg-gray-100 text-gray-900 rounded-md hover:bg-gray-200 transition-colors duration-200"
-    >
+    <Link href={buttonUrl} className={cls}>
       {buttonLabel}
     </Link>
   )
 }
 
-// Image Block Component with Fullscreen
-function ImageBlock({ block, index, colSpanClass }: { block: ContentBlock; index: number; colSpanClass: string }) {
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const roundedClass = block.roundCorners !== false ? 'rounded-lg' : ''
-  const borderClass = block.showBorder ? 'border-2' : ''
-  const borderStyle = block.showBorder ? { borderColor: '#DFDFDF' } : {}
-
-        return (
-    <>
-          <motion.div
-            key={block._key}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className={colSpanClass}
-        ref={(el) => {
-          if (el) {
-            const height = el.offsetHeight
-            document.documentElement.style.setProperty(
-              `--block-height-${block._key}`,
-              `${height}px`
-            )
-          }
-        }}
-      >
-        <div className={`relative w-full bg-gray-200 flex items-center justify-center overflow-hidden ${roundedClass} ${borderClass} group`} style={borderStyle}>
-              {block.imageUrl ? (
-            <>
-                <img 
-                  src={block.imageUrl} 
-                  alt={block.alt || 'Project image'}
-                className="w-full h-auto object-contain"
-              />
-              {/* Fullscreen Button - Top Right */}
-              <button
-                onClick={() => setIsFullscreen(true)}
-                className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 z-10"
-                aria-label="Open fullscreen"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                </svg>
-              </button>
-            </>
-              ) : (
-                <div className="w-full aspect-square flex items-center justify-center text-gray-500">
-              {/* Empty placeholder - grey square box */}
-                </div>
-              )}
-            </div>
-            {block.caption && (
-              <p className="mt-2 text-sm text-gray-600 italic">
-                {block.caption}
-              </p>
-            )}
-        <BlockButton buttonLabel={block.buttonLabel} buttonUrl={block.buttonUrl} />
-      </motion.div>
-
-      {/* Fullscreen Modal */}
-      {isFullscreen && block.imageUrl && (
-        <FullscreenModal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} type="image">
-          <img 
-            src={block.imageUrl} 
-            alt={block.alt || 'Project image'}
-            className="max-w-full max-h-full object-contain"
-          />
-        </FullscreenModal>
-      )}
-    </>
-  )
+interface MediaItem {
+  _key: string
+  mediaType: 'image' | 'video' | 'prototype'
+  url?: string
+  alt?: string
+  caption?: string
+  prototypeUrl?: string
+  prototypeHeight?: number
 }
 
-// Video Block Component with Play Button and Fullscreen
-function VideoBlock({ block, index, colSpanClass }: { block: ContentBlock; index: number; colSpanClass: string }) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const videoRef = React.useRef<HTMLVideoElement>(null)
-  const roundedClass = block.roundCorners !== false ? 'rounded-lg' : ''
-  const borderClass = block.showBorder ? 'border-2' : ''
-  const borderStyle = block.showBorder ? { borderColor: '#DFDFDF' } : {}
-
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play()
-      }
-      setIsPlaying(!isPlaying)
-    }
-  }
-
-  return (
-    <>
-      <motion.div
-        key={block._key}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: index * 0.1 }}
-        className={colSpanClass}
-        ref={(el) => {
-          if (el) {
-            const height = el.offsetHeight
-            document.documentElement.style.setProperty(
-              `--block-height-${block._key}`,
-              `${height}px`
-            )
-          }
-        }}
-      >
-        <div className={`relative w-full bg-gray-200 flex items-center justify-center overflow-hidden ${roundedClass} ${borderClass} group`} style={borderStyle}>
-          {block.videoUrl ? (
-            <>
-              <video 
-                ref={videoRef}
-                src={block.videoUrl}
-                autoPlay={block.autoplay}
-                loop
-                muted
-                playsInline
-                className="w-full h-auto object-contain"
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-              />
-              {/* Top Right Controls */}
-              <div className="absolute top-4 right-4 flex gap-2 z-10">
-                {/* Play/Pause Button - only show if autoplay is disabled */}
-                {!block.autoplay && (
-                  <button
-                    onClick={togglePlay}
-                    className="bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
-                    aria-label={isPlaying ? "Pause video" : "Play video"}
-                  >
-                    {isPlaying ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    )}
-                  </button>
-                )}
-                {/* Fullscreen Button */}
-                <button
-                  onClick={() => setIsFullscreen(true)}
-                  className="bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
-                  aria-label="Open fullscreen"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                  </svg>
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="w-full aspect-square flex items-center justify-center text-gray-500">
-              {/* Empty placeholder - grey square box */}
-            </div>
-          )}
-        </div>
-        {block.caption && (
-          <p className="mt-2 text-sm text-gray-600 italic">
-            {block.caption}
-          </p>
-        )}
-        <BlockButton buttonLabel={block.buttonLabel} buttonUrl={block.buttonUrl} />
-      </motion.div>
-
-      {/* Fullscreen Modal */}
-      {isFullscreen && block.videoUrl && (
-        <FullscreenModal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} type="video">
-          <video 
-            src={block.videoUrl}
-            autoPlay
-            loop
-            controls
-            playsInline
-            className="max-w-full max-h-full object-contain"
-          />
-        </FullscreenModal>
-      )}
-    </>
-  )
+interface ContentBlock {
+  _type: string
+  _key: string
+  title?: string
+  paragraph?: any
+  showInSideNav?: boolean
+  buttonLabel?: string
+  buttonUrl?: string
+  media?: MediaItem[]
 }
 
-function SlideshowBlock({ block, index, colSpanClass }: { block: ContentBlock; index: number; colSpanClass: string }) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+interface ProjectContentProps {
+  project: {
+    title: string
+    subtitle?: string
+    coverImage?: string
+    coverVideo?: string
+    contentBlocks?: ContentBlock[]
+    metadata?: { label: string; value: string }[]
+    projectLink?: string
+    projectUrl?: string
+  }
+}
+
+type MediaPos = { left: number; top: number; width: number }
+
+const captionStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-geist-mono)',
+  fontSize: '12px',
+  color: '#1e1e1e',
+  opacity: 0.6,
+  marginTop: 6,
+  letterSpacing: '0.6px',
+}
+
+function CollageMedia({ item, pos }: { item: MediaItem; pos: MediaPos }) {
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const videoRef = React.useRef<HTMLVideoElement>(null)
-  const items = block.items || []
-  const roundedClass = block.roundCorners !== false ? 'rounded-lg' : ''
-  const borderClass = block.showBorder ? 'border-2' : ''
-  const borderStyle = block.showBorder ? { borderColor: '#DFDFDF' } : {}
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play()
-      }
-      setIsPlaying(!isPlaying)
-    }
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    left: `${pos.left}%`,
+    top: `${pos.top}%`,
+    width: `${pos.width}%`,
+    height: 'auto',
+    zIndex: 1,
   }
 
-  const handleVideoPlay = () => {
-    setIsPlaying(true)
-    setIsVideoPlaying(true)
-  }
-
-  const handleVideoPause = () => {
-    setIsPlaying(false)
-    setIsVideoPlaying(false)
-  }
-
-  const handleVideoEnded = () => {
-    setIsPlaying(false)
-    setIsVideoPlaying(false)
-  }
-
-  if (items.length === 0) {
+  if (item.mediaType === 'image' && item.url) {
     return (
-      <motion.div
-        key={block._key}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: index * 0.1 }}
-        className={colSpanClass}
-      >
-        <div className={`w-full aspect-square bg-gray-200 flex items-center justify-center ${roundedClass}`}>
-          {/* Empty placeholder - grey square box */}
+      <>
+        <div style={style} className="cursor-pointer" onClick={() => setIsFullscreen(true)}>
+          <img src={item.url} alt={item.alt || ''} className="w-full h-auto block" />
+          {item.caption && <p style={captionStyle}>{item.caption}</p>}
         </div>
-        {block.caption && (
-          <p className="mt-2 text-sm text-gray-600 italic">
-            {block.caption}
-          </p>
+        {isFullscreen && (
+          <FullscreenModal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} type="image">
+            <img src={item.url} alt={item.alt || ''} className="max-w-full max-h-full object-contain" />
+          </FullscreenModal>
         )}
-        <BlockButton buttonLabel={block.buttonLabel} buttonUrl={block.buttonUrl} />
-          </motion.div>
-        )
+      </>
+    )
   }
 
-  const nextItem = () => {
-    setCurrentIndex((prev) => (prev + 1) % items.length)
+  if (item.mediaType === 'video' && item.url) {
+    return (
+      <div style={style}>
+        <video src={item.url} autoPlay muted loop playsInline className="w-full h-auto block" />
+        {item.caption && <p style={captionStyle}>{item.caption}</p>}
+      </div>
+    )
   }
 
-  const prevItem = () => {
-    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length)
-  }
-
-  // Auto-play: advance to next item every 3 seconds (if autoplay is enabled and video is not playing)
-  React.useEffect(() => {
-    // Default to true if autoplay is not explicitly set
-    const shouldAutoplay = block.autoplay !== false
-    
-    // Pause autoplay if a video is currently playing
-    if (items.length > 1 && shouldAutoplay && !isVideoPlaying) {
-      const interval = setInterval(() => {
-        nextItem()
-      }, 3000) // Change slide every 3 seconds
-
-      return () => clearInterval(interval) // Cleanup on unmount
+  if (item.mediaType === 'prototype' && item.prototypeUrl) {
+    const protoStyle: React.CSSProperties = {
+      ...style,
+      height: `${item.prototypeHeight || 600}px`,
     }
-  }, [currentIndex, items.length, block.autoplay, isVideoPlaying]) // Re-run when currentIndex, autoplay, or isVideoPlaying changes
+    return (
+      <div style={protoStyle}>
+        <iframe
+          src={item.prototypeUrl}
+          style={{ width: '100%', height: '100%', border: 'none' }}
+          allowFullScreen
+          title="Prototype"
+        />
+        <a
+          href={item.prototypeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'inline-block', marginTop: 8, ...captionStyle, opacity: 1 }}
+        >
+          Open in new tab →
+        </a>
+      </div>
+    )
+  }
 
-  const currentItem = items[currentIndex]
-
-        return (
-          <motion.div
-            key={block._key}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className={colSpanClass}
-          >
-      <div className={`relative w-full aspect-square bg-gray-200 overflow-hidden ${roundedClass} ${borderClass} group`} style={borderStyle}>
-        {/* Current Item - Image or Video */}
-        {currentItem?.type === 'video' ? (
-          <>
-                <video 
-              ref={videoRef}
-              key={currentIndex} // Force remount on video change
-              src={currentItem.url} 
-                  loop
-                  muted
-                  playsInline
-              className="w-full h-full object-cover"
-              onPlay={handleVideoPlay}
-              onPause={handleVideoPause}
-              onEnded={handleVideoEnded}
-            />
-            {/* Top Right Controls for Videos */}
-            <div className="absolute top-4 right-4 flex gap-2 z-20">
-              {/* Play/Pause Button */}
-              <button
-                onClick={togglePlay}
-                className="bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
-                aria-label={isPlaying ? "Pause video" : "Play video"}
-              >
-                {isPlaying ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
-              {/* Fullscreen Button */}
-              <button
-                onClick={() => setIsFullscreen(true)}
-                className="bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
-                aria-label="Open fullscreen"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                </svg>
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <img 
-              src={currentItem?.url} 
-              alt={`Slide ${currentIndex + 1}`}
-              className="w-full h-full object-cover"
-            />
-            {/* Fullscreen Button for Images - Top Right */}
-            <button
-              onClick={() => setIsFullscreen(true)}
-              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 z-20"
-              aria-label="Open fullscreen"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-              </svg>
-            </button>
-          </>
-        )}
-        
-        {/* Navigation Buttons - show on hover */}
-        {items.length > 1 && (
-          <>
-            <button
-              onClick={prevItem}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              aria-label="Previous item"
-            >
-              ←
-            </button>
-            <button
-              onClick={nextItem}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              aria-label="Next item"
-            >
-              →
-            </button>
-            
-            {/* Dots Indicator */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {items.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                    idx === currentIndex ? 'bg-white w-6' : 'bg-white/50'
-                  }`}
-                  aria-label={`Go to slide ${idx + 1}`}
-                />
-              ))}
-                </div>
-          </>
-              )}
-            </div>
-            {block.caption && (
-              <p className="mt-2 text-sm text-gray-600 italic">
-                {block.caption}
-              </p>
-            )}
-      <BlockButton buttonLabel={block.buttonLabel} buttonUrl={block.buttonUrl} />
-      
-      {/* Fullscreen Modal */}
-      {isFullscreen && currentItem && (
-        <FullscreenModal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} type="slideshow">
-          {currentItem.type === 'video' ? (
-            <video 
-              src={currentItem.url}
-              autoPlay
-              loop
-              controls
-              playsInline
-              className="max-w-full max-h-full object-contain"
-            />
-          ) : (
-            <img 
-              src={currentItem.url} 
-              alt={`Slide ${currentIndex + 1}`}
-              className="max-w-full max-h-full object-contain"
-            />
-          )}
-        </FullscreenModal>
-      )}
-    </motion.div>
-  )
+  return null
 }
 
 export function ProjectContent({ project }: ProjectContentProps) {
-  // Build navigation items from text blocks
+  const contentBlocks = project.contentBlocks ?? []
+  const allMediaItems = contentBlocks.flatMap((b) => b.media ?? [])
+
+  // Scroll tracking for title scale — same mechanic as landing page hero text
+  const [scrollY, setScrollY] = useState(0)
+  useEffect(() => {
+    const onScroll = () => setScrollY(window.scrollY)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Title scales 48→24px over first 200px of scroll, width scales proportionally
+  // so line breaks stay at the same words (same lockup), identical to landing page behavior
+  const scrollProgress = Math.min(scrollY / 200, 1)
+  const titleSize = 48 - scrollProgress * 24          // 48 → 24
+  const titleWidth = Math.round(460 * (titleSize / 48)) // 460 → 230 (proportional)
+
+  // Measure sticky title section height so sidebar top tracks below it
+  const titleSectionRef = useRef<HTMLElement>(null)
+  const [titleSectionH, setTitleSectionH] = useState(60)
+  useEffect(() => {
+    if (!titleSectionRef.current) return
+    const ro = new ResizeObserver(() => {
+      if (titleSectionRef.current) setTitleSectionH(titleSectionRef.current.offsetHeight)
+    })
+    ro.observe(titleSectionRef.current)
+    return () => ro.disconnect()
+  }, [])
+
+  // Measure left column height for media collage container
+  const leftColRef = useRef<HTMLDivElement>(null)
+  const [leftColHeight, setLeftColHeight] = useState(800)
+  useEffect(() => {
+    if (!leftColRef.current) return
+    const ro = new ResizeObserver(() => {
+      if (leftColRef.current) setLeftColHeight(leftColRef.current.offsetHeight)
+    })
+    ro.observe(leftColRef.current)
+    return () => ro.disconnect()
+  }, [])
+
+  // Random collage positions — computed after mount to avoid hydration mismatch
+  const [mediaPositions, setMediaPositions] = useState<MediaPos[] | null>(null)
+  useEffect(() => {
+    if (allMediaItems.length === 0) return
+    const n = allMediaItems.length
+    const positions: MediaPos[] = allMediaItems.map((_, i) => {
+      const zoneSize = 100 / n
+      const zoneStart = i * zoneSize
+      return {
+        left: 5 + Math.random() * 45,
+        top: zoneStart + Math.random() * zoneSize * 0.65,
+        width: 38 + Math.random() * 20,
+      }
+    })
+    setMediaPositions(positions)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allMediaItems.length])
+
+  // Side nav items from blocks that have a title and are opted-in
   const navItems = useMemo(() => {
-    if (!project.contentBlocks) return []
-    
-    return project.contentBlocks
-      .filter(block => {
-        // Only include text blocks that are enabled for side panel and have content
-        if (block._type !== 'textBlock' || block.showInSidePanel === false) return false
-        
-        // Filter out blocks with no title, heading1, or heading2
-        const hasContent = block.title || block.heading1 || block.heading2
-        return hasContent
-      })
-      .map(block => {
-        const level: 'title' | 'heading1' | 'heading2' = block.title ? 'title' : block.heading1 ? 'heading1' : 'heading2'
-        const text = block.title || block.heading1 || block.heading2 || ''
-        
-        return {
-          id: `block-${block._key}`,
-          title: text,
-          heading: text,
-          level
-        }
-      })
-      .filter(item => item.title.trim() !== '') // Remove items with empty or whitespace-only text
-  }, [project.contentBlocks])
-
-  const renderContentBlock = (block: ContentBlock, index: number) => {
-    // Determine column span based on width
-    const getColSpanClass = (width?: string) => {
-      switch (width) {
-        case 'quarter':
-          return 'md:col-span-1'
-        case 'half':
-          return 'md:col-span-2'
-        case 'three-quarter':
-          return 'md:col-span-3'
-        case 'full':
-        default:
-          return 'md:col-span-4'
-      }
-    }
-    
-    const colSpanClass = getColSpanClass(block.width)
-    const colSpanValue = block.width === 'quarter' ? 1 : block.width === 'half' ? 2 : block.width === 'three-quarter' ? 3 : 4
-
-    // For empty blocks, determine which adjacent block to match height with
-    if (block._type === 'emptyBlock' && project.contentBlocks) {
-      // Calculate grid position (0-based, counting only on desktop 4-column grid)
-      let gridPosition = 0
-      for (let i = 0; i < index; i++) {
-        const prevBlock = project.contentBlocks[i]
-        const prevWidth = prevBlock.width === 'quarter' ? 1 : prevBlock.width === 'half' ? 2 : prevBlock.width === 'three-quarter' ? 3 : 4
-        gridPosition += prevWidth
-      }
-      
-      // Check if we're on the left half (positions 0-1) or right half (positions 2-3)
-      const positionInRow = gridPosition % 4
-      const isOnLeftHalf = positionInRow === 0
-      const isOnRightHalf = positionInRow === 2
-      
-      // Find the reference block to match height with
-      let referenceBlockId = null
-      
-      if (isOnRightHalf && index > 0) {
-        // On right half, match height of previous block
-        referenceBlockId = project.contentBlocks[index - 1]._key
-      } else if (isOnLeftHalf && index < project.contentBlocks.length - 1) {
-        // On left half, match height of next block
-        referenceBlockId = project.contentBlocks[index + 1]._key
-      }
-      
-      return (
-        <motion.div
-          key={block._key}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.1 }}
-          className={`${colSpanClass} hidden md:block`}
-        >
-          <div 
-            className="w-full bg-transparent"
-            style={{
-              height: referenceBlockId 
-                ? `var(--block-height-${referenceBlockId}, auto)` 
-                : 'auto',
-              minHeight: referenceBlockId ? 'auto' : '300px'
-            }}
-          />
-          </motion.div>
-      )
-    }
-
-    switch (block._type) {
-      case 'imageBlock':
-        return <ImageBlock block={block} index={index} colSpanClass={colSpanClass} />
-
-      case 'videoBlock':
-        return (
-          <VideoBlock key={block._key} block={block} index={index} colSpanClass={colSpanClass} />
-        )
-
-      case 'textBlock':
-        return (
-          <motion.div
-            key={block._key}
-            id={`block-${block._key}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className={`space-y-4 ${colSpanClass} scroll-mt-24`}
-            ref={(el) => {
-              if (el) {
-                const height = el.offsetHeight
-                document.documentElement.style.setProperty(
-                  `--block-height-${block._key}`,
-                  `${height}px`
-                )
-              }
-            }}
-          >
-            {block.title && (
-              block.titleEmail ? (
-                <a 
-                  href={`mailto:${block.titleEmail}`}
-                  className="text-[1.875rem] font-medium text-gray-900 hover:text-gray-600 transition-colors font-[family-name:var(--font-funnel-display)] block"
-                >
-                  {block.title}
-                </a>
-              ) : (
-                <h2 className="text-[1.875rem] font-medium text-gray-900 font-[family-name:var(--font-funnel-display)]">
-                  {block.title}
-                </h2>
-              )
-            )}
-            {block.subtitle && (
-              <h3 className="text-2xl font-semibold text-gray-700 font-[family-name:var(--font-space-mono)]">
-                {block.subtitle}
-              </h3>
-            )}
-            {block.heading1 && (
-              <h4 className="text-[1.368rem] font-medium font-[family-name:var(--font-bitter)]" style={{ color: 'var(--project-accent, #111827)' }}>
-                {block.heading1}
-              </h4>
-            )}
-            {block.heading2 && (
-              <h5 className="text-[20px] font-normal font-[family-name:var(--font-funnel-display)]" style={{ color: 'var(--project-accent, #111827)' }}>
-                {block.heading2}
-              </h5>
-            )}
-            {block.paragraph && (
-              <div className="prose max-w-none">
-                <PortableText value={block.paragraph} components={portableTextComponents} />
-              </div>
-            )}
-            <BlockButton buttonLabel={block.buttonLabel} buttonUrl={block.buttonUrl} />
-          </motion.div>
-        )
-
-      case 'emptyBlock':
-        // This case is now handled at the top of the function
-        return null
-
-      case 'slideshowBlock':
-        return <SlideshowBlock key={block._key} block={block} index={index} colSpanClass={colSpanClass} />
-
-      case 'lineSeparatorBlock':
-        const spacingClasses = {
-          small: 'my-4',
-          medium: 'my-8',
-          large: 'my-12',
-        }
-        const spacing = spacingClasses[block.spacing as keyof typeof spacingClasses] || spacingClasses.medium
-        
-        return (
-          <motion.div
-            key={block._key}
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className={`md:col-span-4 ${spacing}`}
-          >
-            <hr 
-              style={{
-                border: 'none',
-                height: '2px',
-                backgroundColor: '#9ca3af',
-                margin: 0,
-              }}
-            />
-          </motion.div>
-        )
-
-      case 'prototypeEmbedBlock':
-        const prototypeRoundedClass = block.roundCorners !== false ? 'rounded-lg' : ''
-        const prototypeBorderClass = block.showBorder ? 'border-2' : ''
-        const prototypeBorderStyle = block.showBorder ? { borderColor: '#DFDFDF' } : {}
-        const prototypeHeight = block.height || 800
-        
-        return (
-          <motion.div
-            key={block._key}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className={colSpanClass}
-          >
-            <div className={`relative w-full bg-gray-100 overflow-hidden ${prototypeRoundedClass} ${prototypeBorderClass}`} style={prototypeBorderStyle}>
-              {block.prototypeUrl ? (
-                <iframe
-                  src={block.prototypeUrl}
-                  style={{ 
-                    width: '100%', 
-                    height: `${prototypeHeight}px`,
-                    border: 'none'
-                  }}
-                  allowFullScreen
-                  title="Interactive Prototype"
-                />
-              ) : (
-                <div 
-                  className="w-full flex items-center justify-center text-gray-400"
-                  style={{ height: `${prototypeHeight}px` }}
-                >
-                  No Prototype URL provided
-                </div>
-              )}
-            </div>
-            {block.showOpenButton !== false && block.prototypeUrl && (
-              <div className="mt-4">
-                <a
-                  href={block.prototypeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                  </svg>
-                  Open in New Tab
-                </a>
-              </div>
-            )}
-          </motion.div>
-        )
-
-      default:
-        return null
-    }
-  }
+    return contentBlocks
+      .filter((b) => b.showInSideNav !== false && b.title?.trim())
+      .map((b) => ({
+        id: `block-${b._key}`,
+        title: b.title!,
+        heading: b.title!,
+        level: 'title' as const,
+      }))
+  }, [contentBlocks])
 
   return (
-    <div className="min-h-screen">
-      <div className="py-12 px-6">
-        <div className="lg:flex">
+    <div style={{ overflowX: 'clip' }}>
+      {/* ===== STICKY TITLE — real sticky section, in normal flow above cover image ===== */}
+      <section
+        ref={titleSectionRef}
+        className="sticky z-20 px-5 pt-4 pb-2"
+        style={{ top: '52px', backgroundColor: 'var(--tile-hover-bg, #ffffff)' }}
+      >
+        <h1
+          style={{
+            maxWidth: `${titleWidth}px`,
+            fontSize: `${titleSize}px`,
+            fontFamily: 'var(--font-sora)',
+            fontWeight: 300,
+            textTransform: 'uppercase',
+            color: '#1e1e1e',
+            lineHeight: 1.2,
+          }}
+        >
+          {project.title}
+        </h1>
+      </section>
 
-          {/* Side Navigation — sticky left column */}
+      {/* ===== HERO SECTION: cover image centered below title ===== */}
+      <section className="flex justify-center px-6 pb-6">
+        <div className="flex flex-col gap-[14px]" style={{ width: '916px', maxWidth: '100%' }}>
+          {/* Cover image / video — natural aspect ratio, scales to container width */}
+          {project.coverVideo ? (
+            <video
+              src={project.coverVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto block"
+            />
+          ) : project.coverImage ? (
+            <img
+              src={project.coverImage}
+              alt={project.title}
+              className="w-full h-auto block"
+            />
+          ) : (
+            <div className="w-full bg-[#f1f1f1]" style={{ aspectRatio: '16/9' }} />
+          )}
+
+          {/* Metadata rows — same text style as homepage experience bars */}
+          {project.metadata && project.metadata.length > 0 && (
+            <div className="flex flex-col">
+              {project.metadata.map((row, i) => (
+                <div key={i} className="flex items-center py-[6px]">
+                  <span className="font-[family-name:var(--font-geist-mono)] font-normal text-[14px] tracking-[0.8px] text-[#1e1e1e] whitespace-nowrap pr-2">
+                    {row.label}
+                  </span>
+                  <DottedLine />
+                  <span className="font-[family-name:var(--font-geist-mono)] font-normal text-[14px] tracking-[0.8px] text-[#1e1e1e] whitespace-nowrap pl-2">
+                    {row.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ===== CONTENT SECTION ===== */}
+      {(contentBlocks.length > 0 || allMediaItems.length > 0) && (
+        <section className="flex">
+          {/* Sticky sidebar: width = (100vw - 980px) / 2 so text aligns with cover image left edge.
+              top = nav (52px) + measured sticky title height, so items never hide behind the title. */}
           {navItems.length > 0 && (
-            <div className="hidden lg:block flex-shrink-0 lg:w-[14.5rem] xl:w-[18.5rem] 2xl:w-[22.5rem]">
-              <div className="sticky top-6 self-start lg:w-[13rem] xl:w-[17rem] 2xl:w-[21rem]">
-                <SideNavigation items={navItems} showBackButton={true} backUrl="/" />
-              </div>
+            <div
+              className="sticky self-start flex-shrink-0 pt-3"
+              style={{
+                top: `${52 + titleSectionH}px`,
+                width: 'calc((100vw - 980px) / 2)',
+                paddingLeft: '20px',
+              }}
+            >
+              <SideNavigation items={navItems} showBackButton={false} scrollOffset={52 + titleSectionH + 12} />
             </div>
           )}
 
-          {/* Main content column */}
-          <div className="flex-1 md:px-[136px] lg:px-0 lg:pr-[14.5rem] xl:pr-[18.5rem] 2xl:pr-[22.5rem]">
+          {/* Vertical line at cover image left edge */}
+          {navItems.length > 0 && (
+            <div
+              className="self-stretch flex-shrink-0"
+              style={{ width: '1px', background: '#1e1e1e' }}
+            />
+          )}
 
-            {/* Title */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-8"
-            >
-              {project.subtitle && (
-                <p className="text-[16px] text-gray-500 font-normal font-[family-name:var(--font-bitter)] mb-2">
-                  {project.subtitle}
-                </p>
-              )}
-              <h1 className="text-4xl font-semibold text-gray-900 font-[family-name:var(--font-funnel-display)]">
-                {project.title}
-              </h1>
-            </motion.div>
-
-            {/* Cover Image/Video */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-8"
-            >
-              <div className="w-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                {project.coverVideo ? (
-                  <video
-                    src={project.coverVideo}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-auto object-contain"
-                  />
-                ) : project.coverImage ? (
-                  <img
-                    src={project.coverImage}
-                    alt={project.title}
-                    className="w-full h-auto object-contain"
-                  />
-                ) : (
-                  <div className="w-full aspect-[2.5/1] flex items-center justify-center text-gray-500">
-                    Cover Image/Video
-                  </div>
-                )}
-              </div>
-            </motion.div>
-
-            {/* Content Grid - 4 columns */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-4 gap-8"
-            >
-              {project.contentBlocks && project.contentBlocks.length > 0 &&
-                project.contentBlocks.map((block, index) => (
-                  <React.Fragment key={block._key}>
-                    {renderContentBlock(block, index + 1)}
-                  </React.Fragment>
-                ))
-              }
-            </motion.div>
-
-            {/* Project Link */}
-            {(project.projectLink || project.projectUrl) && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="mt-8 text-center"
-              >
-                <a
-                  href={project.projectLink || project.projectUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block px-8 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+          {/* Text content — starts at cover image left edge */}
+          <div
+            ref={leftColRef}
+            style={{ width: '560px', flexShrink: 0 }}
+            className="px-8 pt-3 pb-32 flex flex-col gap-24"
+          >
+            {contentBlocks.map((block, i) => (
+              <React.Fragment key={block._key}>
+                <div
+                  id={`block-${block._key}`}
+                  className="scroll-mt-24 flex flex-col gap-4"
+                  style={{ minHeight: `calc(100vh - ${52 + titleSectionH + 12}px)` }}
                 >
-                  View Live Project →
-                </a>
-              </motion.div>
-            )}
-
-            {/* Google Drive Video Embed */}
-            {project.googleDriveVideoUrl && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-                className="mt-12"
-              >
-                <div className="w-full aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                  <iframe
-                    src={project.googleDriveVideoUrl.replace('/view', '/preview')}
-                    className="w-full h-full"
-                    allow="autoplay"
-                    allowFullScreen
+                  {block.title && (
+                    <h3
+                      style={{
+                        fontSize: '28px',
+                        fontFamily: 'var(--font-sora)',
+                        fontWeight: 300,
+                        textTransform: 'uppercase',
+                        color: '#1e1e1e',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {block.title}
+                    </h3>
+                  )}
+                  {block.paragraph && (
+                    <PortableText
+                      value={block.paragraph}
+                      components={paragraphComponents}
+                    />
+                  )}
+                  <BlockButton
+                    buttonLabel={block.buttonLabel}
+                    buttonUrl={block.buttonUrl}
                   />
                 </div>
-              </motion.div>
-            )}
-
+                {i < contentBlocks.length - 1 && (
+                  <div style={{
+                    marginLeft: 'calc((980px - 100vw) / 2 - 13px)',
+                    marginBottom: '-56px',
+                    width: 'calc(100vw - 40px)',
+                    height: '1px',
+                    background: '#1e1e1e',
+                    flexShrink: 0,
+                  }} />
+                )}
+              </React.Fragment>
+            ))}
           </div>
-        </div>
-      </div>
+
+          {/* Media collage — fills remaining width to the right */}
+          {allMediaItems.length > 0 && (
+            <div
+              className="flex-1 relative"
+              style={{ height: leftColHeight }}
+            >
+              {(mediaPositions ?? []).map((pos, i) => {
+                const item = allMediaItems[i]
+                if (!item) return null
+                return <CollageMedia key={item._key} item={item} pos={pos} />
+              })}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   )
 }
-

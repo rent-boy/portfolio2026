@@ -12,12 +12,13 @@ export function ExperienceTable({ entries }: { entries: ExperienceEntry[] }) {
   return (
     <div className="mt-4 overflow-x-auto">
     <div
-      className="grid gap-x-4 gap-y-[6px]"
-      style={{ gridTemplateColumns: '4rem 14rem 11rem' }}
+      className="grid gap-x-4 gap-y-[6px] items-start justify-items-start"
+      style={{ gridTemplateColumns: '4.4rem 1fr 1fr' }}
     >
       {entries.map((entry, i) => (
         <React.Fragment key={i}>
-          <span className="text-[16px] font-light text-gray-400 font-[family-name:var(--font-funnel-sans)] tabular-nums whitespace-nowrap">
+          <span className="text-[16px] font-light text-gray-400 font-[family-name:var(--font-funnel-sans)] tabular-nums whitespace-nowrap flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" />
             {entry.year}
           </span>
           <span className="text-[16px] font-normal text-gray-700 font-[family-name:var(--font-funnel-sans)]">

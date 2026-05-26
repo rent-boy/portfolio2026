@@ -6,21 +6,23 @@ import { hexToRgba, isGreyOrBlack } from "@/lib/utils"
 
 export async function generateStaticParams() {
   const projects = await getWorkProjects()
-  return projects.map((project: any) => ({
-    projectId: project.slug.current,
-  }))
+  return projects
+    .filter((project: any) => project.isOpen !== false)
+    .map((project: any) => ({ projectId: project.slug.current }))
 }
 
 export default async function ProjectPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params
   const project = await getWorkProjectBySlug(projectId)
 
-  if (!project) {
+  if (!project || project.isOpen === false) {
     notFound()
   }
 
-  const lightHex = project.thumbnailLightColor
-  const bgColor = lightHex && !isGreyOrBlack(lightHex) ? hexToRgba(lightHex, 0.30) : undefined
+  const bgColor = project.hoverBgColor
+    ?? (project.thumbnailLightColor && !isGreyOrBlack(project.thumbnailLightColor)
+      ? hexToRgba(project.thumbnailLightColor, 0.30)
+      : undefined)
 
   const accentHex = project.thumbnailColor
   const accentColor = accentHex && !isGreyOrBlack(accentHex) ? accentHex : undefined

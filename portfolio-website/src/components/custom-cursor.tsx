@@ -1,33 +1,43 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 
 export function CustomCursor() {
   const [pos, setPos] = useState({ x: -100, y: -100 })
-  const [hidden, setHidden] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const pathname = usePathname()
+  const isHome = pathname === "/"
+  const color = isHome ? "#1e1e1e" : "#ffffff"
+
+  const [isTouch, setIsTouch] = useState(true)
+  const [tileHovered, setTileHovered] = useState(false)
 
   useEffect(() => {
+    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0)
+
     const move = (e: MouseEvent) => {
       setPos({ x: e.clientX, y: e.clientY })
-      const target = e.target as Element
-      const shouldHide =
-        !!target.closest(".cursor-none") || !!target.closest("#hero-section")
-      setHidden(shouldHide)
+      setVisible(true)
     }
-
-    const leave = () => setHidden(true)
-    const enter = () => setHidden(false)
+    const leave = () => setVisible(false)
+    const enter = () => setVisible(true)
+    const onTileHover = (e: Event) => setTileHovered((e as CustomEvent).detail.active)
 
     window.addEventListener("mousemove", move)
     document.documentElement.addEventListener("mouseleave", leave)
     document.documentElement.addEventListener("mouseenter", enter)
+    document.addEventListener("tile-hover", onTileHover)
 
     return () => {
       window.removeEventListener("mousemove", move)
       document.documentElement.removeEventListener("mouseleave", leave)
       document.documentElement.removeEventListener("mouseenter", enter)
+      document.removeEventListener("tile-hover", onTileHover)
     }
   }, [])
+
+  if (isTouch) return null
 
   return (
     <div
@@ -35,15 +45,16 @@ export function CustomCursor() {
       style={{
         left: pos.x,
         top: pos.y,
-        color: "#FF00FF",
+        color,
         fontSize: 22,
         fontWeight: 700,
-        transform: `translate(-50%, -50%) scale(${hidden ? 0 : 1})`,
-        opacity: hidden ? 0 : 1,
-        transition: "transform 0.2s ease, opacity 0.2s ease",
+        transform: `translate(-50%, -50%) scale(${visible && !tileHovered ? 1 : 0})`,
+        opacity: visible && !tileHovered ? 1 : 0,
+        transition: "transform 0.15s ease, opacity 0.15s ease, color 0.3s ease",
       }}
+      aria-hidden
     >
-      ✼
+      ✻
     </div>
   )
 }

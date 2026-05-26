@@ -4,7 +4,7 @@ import { hexToRgba } from "@/lib/utils"
 
 export function PageWrapper({ children, bgColor, accentColor }: { children: React.ReactNode; bgColor?: string; accentColor?: string }) {
   return (
-    <div style={{ backgroundColor: bgColor ?? '#ffffff', '--project-accent': accentColor } as React.CSSProperties}>
+    <div style={{ backgroundColor: bgColor ?? '#ffffff', '--tile-hover-bg': bgColor ?? '#ffffff', '--project-accent': accentColor } as React.CSSProperties}>
       {accentColor && (
         <style>{`::selection { background-color: ${hexToRgba(accentColor, 0.25)}; }`}</style>
       )}

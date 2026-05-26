@@ -258,10 +258,12 @@ function ProjectTile({
   const handleMouseEnter = () => {
     setHovered(true)
     if (project.hoverBgColor) document.documentElement.style.setProperty('--tile-hover-bg', project.hoverBgColor)
+    document.dispatchEvent(new CustomEvent('tile-hover', { detail: { active: true } }))
   }
   const handleMouseLeave = () => {
     setHovered(false)
     document.documentElement.style.removeProperty('--tile-hover-bg')
+    document.dispatchEvent(new CustomEvent('tile-hover', { detail: { active: false } }))
   }
 
 
@@ -288,6 +290,7 @@ function ProjectTile({
         <div
           ref={tileRef}
           className="relative h-full"
+          style={{ cursor: hovered ? 'none' : undefined }}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onMouseMove={handleMouseMove}
@@ -311,7 +314,7 @@ function ProjectTile({
             className="absolute top-0 left-0 w-[400px] bg-white p-4 hidden md:flex flex-col gap-3 pointer-events-none z-50 transition-opacity duration-150"
             style={{
               opacity: hovered ? 1 : 0,
-              transform: `translate(${pos.x + 16}px, ${pos.y + 16}px)`,
+              transform: `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%)`,
             }}
           >
             <h3 className="font-semibold text-[32px] leading-[1.2] font-[family-name:var(--font-sora)] text-black">
@@ -438,7 +441,6 @@ export function WorkFilterSection({
   // Mobile ref-width: measured once at 20px so max-width scales proportionally (no re-wrapping)
   const [mobileRefWidth, setMobileRefWidth] = useState<number | null>(null)
   const mobileRefMeasured = useRef(false)
-
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY)
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -531,7 +533,7 @@ export function WorkFilterSection({
       {/* Hero text — sticky on all breakpoints */}
       <section
         ref={heroRef}
-        className="sticky z-[48] px-[12px] pt-0 pb-0 md:px-5"
+        className="sticky z-[48] px-[12px] pt-0 pb-1 md:px-5 md:pb-2"
         style={{ top: `${navH}px`, backgroundColor: 'var(--tile-hover-bg, #ffffff)', transition: 'background-color 0.4s ease' }}
       >
         {heroText && (

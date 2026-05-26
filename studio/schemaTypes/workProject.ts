@@ -1,5 +1,6 @@
 import {defineType} from 'sanity'
 import {orderRankField, orderRankOrdering} from '@sanity/orderable-document-list'
+import {ExperienceBarInput} from '../components/ExperienceBarInput'
 
 export default defineType({
   name: 'workProject',
@@ -37,12 +38,38 @@ export default defineType({
       initialValue: true,
     },
     {
-      name: 'featuredImage',
-      title: 'Featured Image',
-      type: 'image',
-      options: {
-        hotspot: true,
-      },
+      name: 'isOpen',
+      title: 'Open to visitors',
+      type: 'boolean',
+      description: 'When off, project appears on the landing page but is not clickable and its page is inaccessible',
+      initialValue: true,
+    },
+    {
+      name: 'assignedBar',
+      title: 'Experience Bar',
+      type: 'string',
+      description: 'Which experience bar this project appears under on the landing page',
+      components: { input: ExperienceBarInput },
+    },
+    {
+      name: 'hoverBgColor',
+      title: 'Hover — Background Color',
+      type: 'color',
+      description: 'Page background color when user hovers this project tile',
+    },
+    {
+      name: 'hoverAccentColor',
+      title: 'Hover — Accent Color',
+      type: 'color',
+      description: 'Text/element color when user hovers this project tile (for future use)',
+    },
+    {
+      name: 'landingImages',
+      title: 'Landing Page Media',
+      type: 'array',
+      description: '1–3 images or videos shown as a stacked pile on the landing page work grid',
+      of: [{ type: 'file', options: { accept: 'image/*,video/*' } }],
+      validation: (Rule: any) => Rule.max(3),
     },
     {
       name: 'thumbnailVideo',
@@ -69,18 +96,28 @@ export default defineType({
       },
     },
     {
+      name: 'metadata',
+      title: 'Project Metadata',
+      description: 'Key-value rows shown below the cover image (e.g. Role / Designer, Timeline / 2024)',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {name: 'label', title: 'Label', type: 'string'},
+            {name: 'value', title: 'Value', type: 'string'},
+          ],
+          preview: {
+            select: {title: 'label', subtitle: 'value'},
+          },
+        },
+      ],
+    },
+    {
       name: 'contentBlocks',
       title: 'Content Blocks',
       type: 'array',
-      of: [
-        {type: 'imageBlock'},
-        {type: 'videoBlock'},
-        {type: 'textBlock'},
-        {type: 'emptyBlock'},
-        {type: 'slideshowBlock'},
-        {type: 'lineSeparatorBlock'},
-        {type: 'prototypeEmbedBlock'},
-      ],
+      of: [{type: 'contentBlock'}],
     },
     {
       name: 'googleDriveVideoUrl',
@@ -93,7 +130,7 @@ export default defineType({
     select: {
       title: 'title',
       subtitle: 'subtitle',
-      media: 'featuredImage',
+      media: 'coverImage',
     },
   },
 })
