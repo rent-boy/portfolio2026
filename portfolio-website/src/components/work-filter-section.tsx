@@ -32,7 +32,7 @@ interface ExperienceEntry {
   role: string
 }
 
-const MONO = "font-[family-name:var(--font-geist-mono)] font-normal text-[10px] md:text-[14px] tracking-[0.8px] text-[#1e1e1e] whitespace-nowrap"
+const MONO = "font-[family-name:var(--font-geist-mono)] font-normal text-[12px] md:text-[14px] tracking-[0.8px] text-[#1e1e1e] whitespace-nowrap"
 
 const BAR_H = 24
 
@@ -85,7 +85,7 @@ function MobileExperienceBar({ entry }: { entry: ExperienceEntry }) {
   const T = `${MONO} overflow-hidden text-ellipsis max-w-[66%]`
 
   return (
-    <div ref={containerRef} className="flex flex-col gap-1 py-1 md:hidden">
+    <div ref={containerRef} className="flex flex-col gap-[2px] py-[2px] md:hidden">
       {isCompact ? (
         companyInRow1 ? (
           // 2-row: [Year ── Company ──] / [── Role]
@@ -119,16 +119,16 @@ function MobileExperienceBar({ entry }: { entry: ExperienceEntry }) {
       ) : (
         // 3-row fallback
         <>
-          <div className="flex items-center px-4">
+          <div className="flex items-center px-[12px]">
             <span className={`${T} pr-0.5`}>{entry.year}</span>
             <DottedLine />
           </div>
-          <div className="flex items-center px-4">
+          <div className="flex items-center px-[12px]">
             <DottedLine />
             <span className={`${T} px-0.5`}>{entry.company}</span>
             <DottedLine />
           </div>
-          <div className="flex items-center px-4">
+          <div className="flex items-center px-[12px]">
             <DottedLine />
             <span className={`${T} pl-0.5`}>{entry.role}</span>
           </div>
@@ -435,12 +435,9 @@ export function WorkFilterSection({
     return () => ro.disconnect()
   }, [])
 
-  // Scroll-driven hero text scale: desktop 28→20, mobile 20→14, over first 200px of scroll
+  // Scroll-driven hero text scale: desktop 28→20 over first 200px of scroll; mobile fixed at 20px
   const [scrollY, setScrollY] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
-  // Mobile ref-width: measured once at 20px so max-width scales proportionally (no re-wrapping)
-  const [mobileRefWidth, setMobileRefWidth] = useState<number | null>(null)
-  const mobileRefMeasured = useRef(false)
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY)
     window.addEventListener("scroll", onScroll, { passive: true })
@@ -452,22 +449,13 @@ export function WorkFilterSection({
     window.addEventListener("resize", check)
     return () => window.removeEventListener("resize", check)
   }, [])
-  // After isMobile becomes true the DOM shows the text at 20px with no max-width — measure it
-  useEffect(() => {
-    if (!isMobile || mobileRefMeasured.current) return
-    const p = heroRef.current?.querySelector('.hero-text') as HTMLElement | null
-    if (!p) return
-    const w = p.getBoundingClientRect().width
-    if (w > 0) { setMobileRefWidth(w); mobileRefMeasured.current = true }
-  }, [isMobile])
 
   const scrollProgress = Math.min(scrollY / 200, 1)
   const heroFontSize = isMobile
-    ? 20 - scrollProgress * 6                           // 20 → 14
-    : 28 - scrollProgress * 8                           // 28 → 20
-  // Desktop: fixed formula. Mobile: scale the measured ref-width proportionally so line breaks stay fixed.
+    ? 20                                                 // fixed on mobile
+    : 28 - scrollProgress * 8                           // 28 → 20 on desktop
   const heroMaxWidth = isMobile
-    ? mobileRefWidth != null ? mobileRefWidth * (heroFontSize / 20) : undefined
+    ? undefined                                          // controlled by CSS class (max-w-[65%])
     : 507 * (heroFontSize / 28)
 
   // Random company position per bar — 0.5 on SSR, randomised after mount
@@ -539,7 +527,7 @@ export function WorkFilterSection({
         {heroText && (
           <p
             className="hero-text font-light leading-[1.3] text-[#1e1e1e] font-[family-name:var(--font-sora)]"
-            style={{ fontSize: `${heroFontSize}px`, maxWidth: heroMaxWidth != null ? `${heroMaxWidth}px` : undefined }}
+            style={{ fontSize: `${heroFontSize}px`, maxWidth: !isMobile && heroMaxWidth != null ? `${heroMaxWidth}px` : undefined }}
           >
             {heroText}
           </p>
@@ -585,7 +573,7 @@ export function WorkFilterSection({
             </div>
 
             {/* Project tiles — last section needs full-screen min-h so final bar can reach its sticky slot */}
-            <div className={`${i === entries.length - 1 ? "min-h-screen" : "min-h-[40vh]"} pb-3 md:pb-8`}>
+            <div className={`${i === entries.length - 1 ? "min-h-[60vh]" : "min-h-[40vh]"} pb-3 md:pb-8`}>
               {sectionSlots.map(({ project }, j) => (
                 <ProjectTile
                   key={project._id}

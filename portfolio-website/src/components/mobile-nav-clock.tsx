@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 
-const cls = "font-[family-name:var(--font-geist-mono)] font-normal text-[10px] uppercase tracking-[0.8px] text-[#1e1e1e] whitespace-nowrap"
+const cls = "font-[family-name:var(--font-geist-mono)] font-normal text-[12px] uppercase tracking-[0.8px] text-[#1e1e1e] whitespace-nowrap"
 
 export function MobileNavClock() {
   const ref = useRef<HTMLDivElement>(null)
@@ -26,9 +26,9 @@ export function MobileNavClock() {
     const m = parseInt(parts.find(p => p.type === "minute")!.value)
     const fraction = (h * 60 + m) / (24 * 60)
 
-    // Divide the day into 3 equal segments — one per nav row line
-    const segment = Math.min(Math.floor(fraction * 3), 2)
-    const segFrac = (fraction * 3) % 1
+    // Divide the day into 2 equal segments — one per nav clock line
+    const segment = Math.min(Math.floor(fraction * 2), 1)
+    const segFrac = (fraction * 2) % 1
 
     const navRect = nav.getBoundingClientRect()
     const lineEl = nav.querySelector(`[data-mobile-line="${segment + 1}"]`) as HTMLElement | null
@@ -43,7 +43,7 @@ export function MobileNavClock() {
       lineLeft = r.left - navRect.left
       lineWidth = r.width
     } else {
-      lineY = 20 + segment * 37
+      lineY = segment === 0 ? 20 : 20 + 37
       lineLeft = 12
       lineWidth = navRect.width - 24
     }
