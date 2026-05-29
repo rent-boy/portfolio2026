@@ -45,6 +45,14 @@ export default defineType({
       initialValue: true,
     },
     {
+      name: 'closedProjectUrl',
+      title: 'External link (closed projects only)',
+      type: 'url',
+      description: 'Optional — if set, clicking the tile opens this URL instead of the project page. Leave empty to keep the tile non-clickable.',
+      hidden: ({ parent }: { parent: { isOpen?: boolean } }) => parent?.isOpen !== false,
+      validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }),
+    },
+    {
       name: 'assignedBar',
       title: 'Experience Bar',
       type: 'string',
@@ -67,9 +75,9 @@ export default defineType({
       name: 'landingImages',
       title: 'Landing Page Media',
       type: 'array',
-      description: '1–3 images or videos shown as a stacked pile on the landing page work grid',
+      description: '1–10 images or videos shown as a stacked pile on the landing page work grid',
       of: [{ type: 'file', options: { accept: 'image/*,video/*' } }],
-      validation: (Rule: any) => Rule.max(3),
+      validation: (Rule: any) => Rule.max(10),
     },
     {
       name: 'thumbnailVideo',

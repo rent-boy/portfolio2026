@@ -7,18 +7,24 @@ export default defineType({
   fields: [
     {
       name: 'cvButtonText',
-      title: 'CV Button Label',
+      title: 'Resume Button Label',
       type: 'string',
-      description: 'Text shown on the bottom bar CV button (e.g. "View CV" or "Download Resume")',
-      initialValue: 'View CV',
-      validation: (Rule) => Rule.required(),
+      description: 'Label shown on the Resume button in the top bar (e.g. "Resume" or "CV")',
+      initialValue: 'Resume',
     },
     {
       name: 'cvButtonUrl',
-      title: 'CV Button URL',
+      title: 'Resume URL',
       type: 'url',
-      description: 'Link the CV button opens — use a direct PDF link or Google Drive share URL',
-      validation: (Rule) => Rule.required().uri({ scheme: ['http', 'https'] }),
+      description: 'Link for the Resume button — use a direct PDF link or Google Drive share URL',
+      validation: (Rule) => Rule.uri({ scheme: ['http', 'https'] }),
+    },
+    {
+      name: 'linkedInButtonText',
+      title: 'LinkedIn Button Label',
+      type: 'string',
+      description: 'Label shown on the LinkedIn button in the top bar',
+      initialValue: 'LinkedIn',
     },
     {
       name: 'linkedInUrl',
@@ -28,11 +34,18 @@ export default defineType({
       validation: (Rule) => Rule.uri({ scheme: ['http', 'https'] }),
     },
     {
-      name: 'linkedInButtonText',
-      title: 'LinkedIn Button Label',
+      name: 'emailButtonText',
+      title: 'Email Button Label',
       type: 'string',
-      description: 'Text shown on the LinkedIn button (e.g. "LinkedIn")',
-      initialValue: 'LinkedIn',
+      description: 'Label shown on the Email button in the top bar',
+      initialValue: 'Email',
+    },
+    {
+      name: 'emailAddress',
+      title: 'Email Address',
+      type: 'string',
+      description: 'Your email address — mailto: is added automatically (e.g. yourname@example.com)',
+      initialValue: 'siddharthkothiyal05@gmail.com',
     },
     {
       name: 'ogTitle',
@@ -50,9 +63,9 @@ export default defineType({
     {
       name: 'bottomBarText',
       title: 'Bottom Bar Text',
-      type: 'text',
-      rows: 4,
-      description: 'Descriptive text shown below the buttons. Use line breaks to split into multiple lines.',
+      type: 'string',
+      description: 'Text shown in the bottom bar. Currently: "Vibe coded with ❤ using Claude"',
+      initialValue: 'Vibe coded with ❤ using Claude',
     },
   ],
   preview: {

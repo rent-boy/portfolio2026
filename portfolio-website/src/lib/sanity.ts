@@ -28,6 +28,7 @@ export async function getWorkProjects() {
     featured,
     visible,
     isOpen,
+    closedProjectUrl,
     period,
     "landingImages": landingImages[] { "url": asset->url, "mimeType": asset->mimeType },
     "thumbnailImage": coverImage.asset->url,
@@ -124,10 +125,12 @@ export async function getHomePage() {
 // Fetch site-wide settings (bottom bar buttons + text)
 export async function getSiteSettings() {
   const query = `*[_type == "siteSettings" && _id == "siteSettings"][0] {
+    linkedInButtonText,
+    linkedInUrl,
+    emailButtonText,
+    emailAddress,
     cvButtonText,
     cvButtonUrl,
-    linkedInUrl,
-    linkedInButtonText,
     bottomBarText,
     ogTitle,
     "ogImageUrl": ogImage.asset->url

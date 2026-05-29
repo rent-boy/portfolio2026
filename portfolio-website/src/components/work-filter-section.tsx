@@ -24,6 +24,7 @@ interface Project {
   hoverBgColor?: string
   hoverAccentColor?: string
   isOpen?: boolean
+  closedProjectUrl?: string
 }
 
 interface ExperienceEntry {
@@ -145,15 +146,26 @@ function ProjectImagePile({ items }: { items: LandingMedia[] }) {
 
   useEffect(() => {
     const n = items.length
-    const zones = items.map((_, i) => i)
-    zones.sort(() => Math.random() - 0.5)
+    // 2D grid: assign each item to a unique cell, then jitter within it
+    const cols = n <= 2 ? n : Math.ceil(Math.sqrt(n))
+    const rows = Math.ceil(n / cols)
+    const cellW = 100 / cols
+    const cellH = 100 / rows
+    // Build cell list and shuffle so assignment is random
+    const cells: { col: number; row: number }[] = []
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++)
+        if (cells.length < n) cells.push({ col: c, row: r })
+    cells.sort(() => Math.random() - 0.5)
     setLayouts(items.map((_, i) => {
-      const itemW = 36 + Math.random() * 16
-      const itemH = 52 + Math.random() * 26
-      const zoneSpan = 95 / n
-      const zoneStart = zones[i] * zoneSpan
-      const left = Math.min(zoneStart + Math.random() * zoneSpan * 0.9, 100 - itemW)
-      const top  = Math.random() * (100 - itemH)
+      const itemW = 36 + Math.random() * 16          // 36–52%
+      const itemH = 52 + Math.random() * 26          // 52–78%
+      const { col, row } = cells[i]
+      // Place item centered in its cell + random jitter (40% of cell size)
+      const centerX = (col + 0.5) * cellW + (Math.random() - 0.5) * cellW * 0.4
+      const centerY = (row + 0.5) * cellH + (Math.random() - 0.5) * cellH * 0.4
+      const left = Math.min(Math.max(centerX - itemW / 2, 0), 100 - itemW)
+      const top  = Math.min(Math.max(centerY - itemH / 2, 0), 100 - itemH)
       return { left, top, width: itemW, height: itemH, z: i }
     }))
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -270,9 +282,12 @@ function ProjectTile({
   const metaParts = [project.client, project.category, project.year].filter(Boolean)
 
   const open = project.isOpen !== false
-  const Wrapper = open ? Link : 'div'
+  const hasExternalLink = !open && !!project.closedProjectUrl
+  const Wrapper = open ? Link : hasExternalLink ? 'a' : 'div'
   const wrapperProps = open
     ? { href: `/${project.slug.current}`, className: 'block cursor-none' }
+    : hasExternalLink
+    ? { href: project.closedProjectUrl, target: '_blank', rel: 'noopener noreferrer', className: 'block cursor-none' }
     : { className: 'block cursor-default select-none' }
 
   return (

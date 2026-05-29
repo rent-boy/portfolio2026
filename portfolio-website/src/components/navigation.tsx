@@ -8,8 +8,11 @@ const sep = <span className={cls}>✻</span>
 
 export async function Navigation() {
   const settings = await getSiteSettings()
+  const linkedInLabel = settings?.linkedInButtonText || "LinkedIn"
   const linkedInUrl = settings?.linkedInUrl || "#"
-  const email = "mailto:siddharthkothiyal05@gmail.com"
+  const emailLabel = settings?.emailButtonText || "Email"
+  const emailUrl = settings?.emailAddress ? `mailto:${settings.emailAddress}` : "mailto:siddharthkothiyal05@gmail.com"
+  const resumeLabel = settings?.cvButtonText || "Resume"
   const resumeUrl = settings?.cvButtonUrl || "#"
 
   return (
@@ -35,11 +38,11 @@ export async function Navigation() {
           <MovingClock />
         </div>
         <div className={`hidden md:flex items-center gap-3 ${cls}`}>
-          <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">LinkedIn</a>
+          <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">{linkedInLabel}</a>
           {sep}
-          <a href={email} className="hover:opacity-60 transition-opacity">Email</a>
+          <a href={emailUrl} className="hover:opacity-60 transition-opacity">{emailLabel}</a>
           {sep}
-          <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">Resume</a>
+          <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">{resumeLabel}</a>
         </div>
 
         {/* Mobile row 1 line — tagged for MobileNavClock (segment 0: 00:00–08:00) */}
@@ -54,11 +57,11 @@ export async function Navigation() {
         <div className="h-px bg-[#1e1e1e] mx-[12px]" data-mobile-line="2" />
         {/* Buttons row — no line, spread across */}
         <div className={`flex items-center justify-between px-[12px] py-2 ${cls}`}>
-          <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">LinkedIn</a>
+          <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">{linkedInLabel}</a>
           {sep}
-          <a href={email} className="hover:opacity-60 transition-opacity">Email</a>
+          <a href={emailUrl} className="hover:opacity-60 transition-opacity">{emailLabel}</a>
           {sep}
-          <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">Resume</a>
+          <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-60 transition-opacity">{resumeLabel}</a>
         </div>
       </div>
 
