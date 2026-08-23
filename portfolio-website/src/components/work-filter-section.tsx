@@ -551,7 +551,7 @@ export function WorkFilterSection({
 
       {/* Profile image — desktop only, bottom-right aligned with bar text (px-5 = 20px) */}
       {profileImageUrl && (
-        <div className="absolute z-[49] bottom-8 md:bottom-[18px] right-[12px] md:right-5 w-full md:w-fit">
+        <div className="absolute z-[49] bottom-8 md:bottom-[18px] left-[12px] right-[12px] md:left-auto md:right-5 w-full md:w-fit">
           <img
             src={profileImageUrl}
             alt="Profile"
