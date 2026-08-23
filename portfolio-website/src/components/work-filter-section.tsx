@@ -551,11 +551,11 @@ export function WorkFilterSection({
 
       {/* Profile image — desktop only, bottom-right aligned with bar text (px-5 = 20px) */}
       {profileImageUrl && (
-        <div className="absolute z-[49] bottom-8 md:bottom-[18px] right-[12px] md:right-5">
+        <div className="absolute z-[49] bottom-8 md:bottom-[18px] right-[12px] md:right-5 w-fit">
           <img
             src={profileImageUrl}
             alt="Profile"
-            className="w-[130px] h-[155px] md:w-[180px] md:h-[214px] object-cover object-top grayscale hover:grayscale-0 transition-[filter] duration-300"
+            className="w-auto h-[160px] md:h-[280px] hover:brightness-110 hover:saturate-[1.2] transition-all duration-300"
           />
         </div>
       )}
