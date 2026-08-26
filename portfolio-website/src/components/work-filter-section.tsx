@@ -453,19 +453,26 @@ export function WorkFilterSection({
   // Scroll-driven hero text scale: desktop 28→20 over first 200px of scroll; mobile fixed at 20px
   const [scrollY, setScrollY] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [viewportH, setViewportH] = useState(0)
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY)
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
+    const check = () => {
+      setIsMobile(window.innerWidth < 768)
+      setViewportH(window.innerHeight)
+    }
     check()
     window.addEventListener("resize", check)
     return () => window.removeEventListener("resize", check)
   }, [])
 
-  const scrollProgress = Math.min(scrollY / 200, 1)
+  // Desktop only: space that pushes hero to vertical center on load
+  const spacerH = isMobile ? 0 : Math.max(0, viewportH / 2 - navH)
+  // Font scaling starts only once the hero has scrolled up to its sticky position
+  const scrollProgress = Math.min(Math.max((scrollY - spacerH) / 200, 0), 1)
   const heroFontSize = isMobile
     ? 20                                                 // fixed on mobile
     : 28 - scrollProgress * 8                           // 28 → 20 on desktop
@@ -533,6 +540,9 @@ export function WorkFilterSection({
 
   return (
     <div className="relative overflow-x-clip">
+      {/* Pushes hero to vertical center on desktop; scrolls away as user scrolls */}
+      {spacerH > 0 && <div style={{ height: `${spacerH}px` }} />}
+
       {/* Hero text — sticky on all breakpoints */}
       <section
         ref={heroRef}
