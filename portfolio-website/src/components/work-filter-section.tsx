@@ -470,7 +470,7 @@ export function WorkFilterSection({
   }, [])
 
   // Desktop only: space that pushes hero to vertical center on load
-  const spacerH = isMobile ? 0 : Math.max(0, viewportH / 2 - navH)
+  const spacerH = isMobile ? 0 : Math.max(0, viewportH / 2 - navH - heroH / 2)
   // Font scaling starts only once the hero has scrolled up to its sticky position
   const scrollProgress = Math.min(Math.max((scrollY - spacerH) / 200, 0), 1)
   const heroFontSize = isMobile
