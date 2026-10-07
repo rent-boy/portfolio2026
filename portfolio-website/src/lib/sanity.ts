@@ -6,6 +6,11 @@ export const client = createClient({
   dataset: 'production',
   apiVersion: '2024-01-01',
   useCdn: false, // Set to true for production for better performance
+  // Local draft preview (`npm run dev:drafts`): read unpublished drafts with the developer's
+  // own Sanity login. Never set on Vercel, so the live site only ever shows published content.
+  ...(process.env.SANITY_PREVIEW_TOKEN
+    ? { token: process.env.SANITY_PREVIEW_TOKEN, perspective: 'drafts' as const }
+    : {}),
 })
 
 const builder = imageUrlBuilder(client)
@@ -16,8 +21,7 @@ export function urlFor(source: any) {
 }
 
 // Fetch all work projects
-export async function getWorkProjects() {
-  const query = `*[_type == "workProject" && !(_id in path("drafts.**")) && visible != false] | order(orderRank) {
+const listProjection = `{
     _id,
     title,
     subtitle,
@@ -41,14 +45,18 @@ export async function getWorkProjects() {
     "hoverBgColor": hoverBgColor.hex,
     "hoverAccentColor": hoverAccentColor.hex
   }`
-  
+
+export async function getWorkProjects() {
+  const query = `*[_type == "workProject" && !(_id in path("drafts.**")) && visible != false] | order(orderRank) ${listProjection}`
+
   return await client.fetch(query)
 }
 
 // Fetch single work project by slug
-export async function getWorkProjectBySlug(slug: string) {
-  const query = `*[_type == "workProject" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
+const projectProjection = `{
     _id,
+    _updatedAt,
+    showUpdatingNotice,
     title,
     subtitle,
     slug,
@@ -85,6 +93,9 @@ export async function getWorkProjectBySlug(slug: string) {
     googleDriveVideoUrl,
     "hoverBgColor": hoverBgColor.hex
   }`
+
+export async function getWorkProjectBySlug(slug: string) {
+  const query = `*[_type == "workProject" && slug.current == $slug && !(_id in path("drafts.**"))][0] ${projectProjection}`
   
   return await client.fetch(query, { slug })
 }

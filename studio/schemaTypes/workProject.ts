@@ -45,6 +45,13 @@ export default defineType({
       initialValue: true,
     },
     {
+      name: 'showUpdatingNotice',
+      title: 'Show "content being updated" notice',
+      type: 'boolean',
+      description: 'Small notice under the project title with the date this project was last edited',
+      initialValue: true,
+    },
+    {
       name: 'closedProjectUrl',
       title: 'External link (closed projects only)',
       type: 'url',

@@ -2,6 +2,43 @@
 
 html, *, *:hover, *:focus, *:active { cursor: none !important; }
 
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Marching-ants dotted border/line: 1px dots every 5px, looping along the edge */
+.marching-ants {
+  --ants-color: #1e1e1e;
+  --ants-step: 5px;
+  background-image:
+    linear-gradient(90deg, var(--ants-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ants-color) 1px, transparent 1px),
+    linear-gradient(0deg, var(--ants-color) 1px, transparent 1px),
+    linear-gradient(0deg, var(--ants-color) 1px, transparent 1px);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: var(--ants-step) 1px, var(--ants-step) 1px, 1px var(--ants-step), 1px var(--ants-step);
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  animation: marching-ants 0.8s linear infinite;
+}
+@keyframes marching-ants {
+  to {
+    background-position: var(--ants-step) 0, calc(-1 * var(--ants-step)) 100%, 0 calc(-1 * var(--ants-step)), 100% var(--ants-step);
+  }
+}
+.marching-line {
+  --ants-color: #1e1e1e;
+  --ants-step: 5px;
+  height: 1px;
+  background-image: linear-gradient(90deg, var(--ants-color) 1px, transparent 1px);
+  background-size: var(--ants-step) 1px;
+  background-repeat: repeat-x;
+  animation: marching-line 0.8s linear infinite;
+}
+@keyframes marching-line {
+  to { background-position: var(--ants-step) 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marching-ants, .marching-line { animation: none; }
+}
+
 
 @custom-variant dark (&:is(.dark *));
 

@@ -44,6 +44,14 @@ export function FullscreenModal({ isOpen, onClose, children, type }: FullscreenM
   }, [isOpen])
 
   useEffect(() => {
+    if (!isOpen) return
+    document.dispatchEvent(new CustomEvent('cursor-on-dark', { detail: { active: true } }))
+    return () => {
+      document.dispatchEvent(new CustomEvent('cursor-on-dark', { detail: { active: false } }))
+    }
+  }, [isOpen])
+
+  useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose()

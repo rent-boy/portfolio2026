@@ -65,7 +65,7 @@ export default defineType({
     {
       name: 'media',
       title: 'Media',
-      description: 'Add images, videos, or prototype embeds — all appear on the right side. Multiple items create a collage.',
+      description: 'Images, videos or prototype embeds for this section. They stack in order in the right column, beside the text.',
       type: 'array',
       of: [
         {

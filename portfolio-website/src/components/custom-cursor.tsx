@@ -7,11 +7,16 @@ export function CustomCursor() {
   const [pos, setPos] = useState({ x: -100, y: -100 })
   const [visible, setVisible] = useState(false)
   const pathname = usePathname()
-  const isHome = pathname === "/"
-  const color = isHome ? "#1e1e1e" : "#ffffff"
+  // Fullscreen media viewer: black backdrop with media of any colour. A white cursor in
+  // difference mode inverts against whatever is under it, so it stays visible on both.
+  const [onDark, setOnDark] = useState(false)
+  const color = onDark ? "#ffffff" : "#1e1e1e"
 
   const [isTouch, setIsTouch] = useState(true)
-  const [tileHovered, setTileHovered] = useState(false)
+  // Remember which page the tile hover started on: a tile click navigates away
+  // mid-hover and never reports hover end, so only hide the cursor on that page.
+  const [tileHoverPath, setTileHoverPath] = useState<string | null>(null)
+  const tileHovered = tileHoverPath === pathname
 
   useEffect(() => {
     setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0)
@@ -22,18 +27,22 @@ export function CustomCursor() {
     }
     const leave = () => setVisible(false)
     const enter = () => setVisible(true)
-    const onTileHover = (e: Event) => setTileHovered((e as CustomEvent).detail.active)
+    const onTileHover = (e: Event) =>
+      setTileHoverPath((e as CustomEvent).detail.active ? window.location.pathname : null)
 
     window.addEventListener("mousemove", move)
     document.documentElement.addEventListener("mouseleave", leave)
     document.documentElement.addEventListener("mouseenter", enter)
     document.addEventListener("tile-hover", onTileHover)
+    const onDarkOverlay = (e: Event) => setOnDark((e as CustomEvent).detail.active)
+    document.addEventListener("cursor-on-dark", onDarkOverlay)
 
     return () => {
       window.removeEventListener("mousemove", move)
       document.documentElement.removeEventListener("mouseleave", leave)
       document.documentElement.removeEventListener("mouseenter", enter)
       document.removeEventListener("tile-hover", onTileHover)
+      document.removeEventListener("cursor-on-dark", onDarkOverlay)
     }
   }, [])
 
@@ -41,7 +50,7 @@ export function CustomCursor() {
 
   return (
     <div
-      className="fixed pointer-events-none z-[9999] select-none leading-none"
+      className="fixed pointer-events-none z-[10001] select-none leading-none"
       style={{
         left: pos.x,
         top: pos.y,
@@ -50,7 +59,8 @@ export function CustomCursor() {
         fontWeight: 700,
         transform: `translate(-50%, -50%) scale(${visible && !tileHovered ? 1 : 0})`,
         opacity: visible && !tileHovered ? 1 : 0,
-        transition: "transform 0.15s ease, opacity 0.15s ease, color 0.3s ease",
+        mixBlendMode: onDark ? "difference" : "normal",
+        transition: "transform 0.15s ease, opacity 0.15s ease",
       }}
       aria-hidden
     >

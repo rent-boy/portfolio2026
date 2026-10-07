@@ -99,6 +99,59 @@ const paragraphComponents = {
   },
 }
 
+const MONO_SMALL =
+  'font-[family-name:var(--font-geist-mono)] font-normal text-[11px] md:text-[12px] uppercase tracking-[0.8px] text-[#1e1e1e] whitespace-nowrap'
+// Side menu column is narrow (~190px at 1440 wide), so the notice there uses a tighter size
+const MONO_NOTICE =
+  'font-[family-name:var(--font-geist-mono)] font-normal text-[10px] uppercase tracking-[0.5px] text-[#1e1e1e]'
+
+// "Content being updated" notice with the date the project was last edited in the CMS.
+// Two lines inside a marching-ants dotted border (see .marching-ants in globals.css).
+// `compact` is a single-line version for phones.
+function UpdatingNotice({
+  updatedAt,
+  compact = false,
+  className = '',
+}: {
+  updatedAt?: string
+  compact?: boolean
+  className?: string
+}) {
+  const date = updatedAt
+    ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Oslo' })
+        .format(new Date(updatedAt))
+    : null
+  if (compact) {
+    return (
+      <div
+        role="status"
+        className={`marching-ants ${MONO_SMALL} flex items-center gap-2 px-3 py-[6px] ${className}`}
+        style={{ backgroundColor: 'var(--tile-hover-bg, #ffffff)' }}
+      >
+        <span>Updating</span>
+        {date && <time dateTime={updatedAt} className="opacity-70">· {date}</time>}
+      </div>
+    )
+  }
+
+  return (
+    <div
+      role="status"
+      className={`marching-ants flex flex-col gap-1 px-2 py-[6px] ${className}`}
+      style={{ backgroundColor: 'var(--tile-hover-bg, #ffffff)' }}
+    >
+      <span className={MONO_NOTICE}>Content being updated</span>
+      {date && (
+        <span className={`${MONO_NOTICE} flex flex-wrap items-center gap-x-[6px] opacity-70`}>
+          <span className="whitespace-nowrap">Last updated</span>
+          <span aria-hidden className="marching-line flex-1 min-w-3" />
+          <time dateTime={updatedAt} className="whitespace-nowrap">{date}</time>
+        </span>
+      )}
+    </div>
+  )
+}
+
 function BlockButton({ buttonLabel, buttonUrl }: { buttonLabel?: string; buttonUrl?: string }) {
   if (!buttonLabel || !buttonUrl) return null
   const isExternal = buttonUrl.startsWith('http://') || buttonUrl.startsWith('https://')
@@ -149,10 +202,10 @@ interface ProjectContentProps {
     metadata?: { label: string; value: string }[]
     projectLink?: string
     projectUrl?: string
+    _updatedAt?: string
+    showUpdatingNotice?: boolean
   }
 }
-
-type MediaPos = { left: number; top: number; width: number }
 
 const captionStyle: React.CSSProperties = {
   fontFamily: 'var(--font-geist-mono)',
@@ -163,53 +216,44 @@ const captionStyle: React.CSSProperties = {
   letterSpacing: '0.6px',
 }
 
-function CollageMedia({ item, pos }: { item: MediaItem; pos: MediaPos }) {
-  const [isFullscreen, setIsFullscreen] = useState(false)
-
-  const style: React.CSSProperties = {
-    position: 'absolute',
-    left: `${pos.left}%`,
-    top: `${pos.top}%`,
-    width: `${pos.width}%`,
-    height: 'auto',
-    zIndex: 1,
-  }
-
+function BlockMedia({ item, onOpen }: { item: MediaItem; onOpen: (key: string) => void }) {
   if (item.mediaType === 'image' && item.url) {
     return (
-      <>
-        <div style={style} className="cursor-pointer" onClick={() => setIsFullscreen(true)}>
-          <img src={item.url} alt={item.alt || ''} className="w-full h-auto block" />
-          {item.caption && <p style={captionStyle}>{item.caption}</p>}
-        </div>
-        {isFullscreen && (
-          <FullscreenModal isOpen={isFullscreen} onClose={() => setIsFullscreen(false)} type="image">
-            <img src={item.url} alt={item.alt || ''} className="max-w-full max-h-full object-contain" />
-          </FullscreenModal>
-        )}
-      </>
+      <figure>
+        <img
+          src={item.url}
+          alt={item.alt || ''}
+          className="w-full h-auto block cursor-pointer"
+          onClick={() => onOpen(item._key)}
+        />
+        {item.caption && <figcaption style={captionStyle}>{item.caption}</figcaption>}
+      </figure>
     )
   }
 
   if (item.mediaType === 'video' && item.url) {
     return (
-      <div style={style}>
-        <video src={item.url} autoPlay muted loop playsInline className="w-full h-auto block" />
-        {item.caption && <p style={captionStyle}>{item.caption}</p>}
-      </div>
+      <figure>
+        <video
+          src={item.url}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-auto block cursor-pointer"
+          onClick={() => onOpen(item._key)}
+        />
+        {item.caption && <figcaption style={captionStyle}>{item.caption}</figcaption>}
+      </figure>
     )
   }
 
   if (item.mediaType === 'prototype' && item.prototypeUrl) {
-    const protoStyle: React.CSSProperties = {
-      ...style,
-      height: `${item.prototypeHeight || 600}px`,
-    }
     return (
-      <div style={protoStyle}>
+      <figure>
         <iframe
           src={item.prototypeUrl}
-          style={{ width: '100%', height: '100%', border: 'none' }}
+          style={{ width: '100%', height: `${item.prototypeHeight || 600}px`, border: 'none' }}
           allowFullScreen
           title="Prototype"
         />
@@ -221,16 +265,145 @@ function CollageMedia({ item, pos }: { item: MediaItem; pos: MediaPos }) {
         >
           Open in new tab →
         </a>
-      </div>
+      </figure>
     )
   }
 
   return null
 }
 
+const arrowButtonClass =
+  'absolute top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 flex items-center justify-center bg-black/60 hover:bg-black/80 border border-white/30 rounded-full transition-colors disabled:opacity-0 disabled:pointer-events-none'
+
+// Fullscreen viewer for every image/video on the page, in page order, with previous/next.
+function MediaViewer({
+  items,
+  index,
+  onIndex,
+  onClose,
+}: {
+  items: MediaItem[]
+  index: number | null
+  onIndex: (i: number) => void
+  onClose: () => void
+}) {
+  const item = index === null ? null : items[index]
+  const hasPrev = index !== null && index > 0
+  const hasNext = index !== null && index < items.length - 1
+
+  useEffect(() => {
+    if (index === null) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && index > 0) onIndex(index - 1)
+      if (e.key === 'ArrowRight' && index < items.length - 1) onIndex(index + 1)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [index, items.length, onIndex])
+
+  if (!item) return null
+
+  return (
+    <FullscreenModal isOpen onClose={onClose} type={item.mediaType === 'video' ? 'video' : 'image'}>
+      <figure className="flex flex-col items-center justify-center w-full h-full gap-3 px-14 md:px-20">
+        {item.mediaType === 'video' ? (
+          <video
+            key={item._key}
+            src={item.url}
+            autoPlay
+            loop
+            playsInline
+            controls
+            className="max-w-full min-h-0 flex-1 object-contain"
+          />
+        ) : (
+          <img key={item._key} src={item.url} alt={item.alt || ''} className="max-w-full min-h-0 flex-1 object-contain" />
+        )}
+        <figcaption style={{ ...captionStyle, color: '#ffffff', opacity: 0.7, marginTop: 0 }}>
+          {index! + 1} / {items.length}
+          {item.caption ? ` — ${item.caption}` : ''}
+        </figcaption>
+      </figure>
+      <button
+        type="button"
+        aria-label="Previous"
+        className={`${arrowButtonClass} left-2 md:left-4`}
+        disabled={!hasPrev}
+        onClick={() => hasPrev && onIndex(index! - 1)}
+      >
+        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        aria-label="Next"
+        className={`${arrowButtonClass} right-2 md:right-4`}
+        disabled={!hasNext}
+        onClick={() => hasNext && onIndex(index! + 1)}
+      >
+        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 6l6 6-6 6" />
+        </svg>
+      </button>
+    </FullscreenModal>
+  )
+}
+
+// One section: text on the left, its media stacked on the right.
+// Each column is at most one viewport tall and scrolls on its own; once a column
+// reaches its end, scrolling carries on to the page (and the next section).
+const columnStyle: React.CSSProperties = {
+  maxHeight: 'calc(100vh - var(--project-sticky-top, 120px))',
+  overflowY: 'auto',
+  scrollbarWidth: 'none', // Firefox; WebKit is hidden via .no-scrollbar
+}
+
+function BlockGrid({ block, onOpen }: { block: ContentBlock; onOpen: (key: string) => void }) {
+  const media = block.media ?? []
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 items-start">
+      <div className="no-scrollbar flex flex-col gap-4 md:pr-2" style={columnStyle}>
+        {block.title && (
+          <h3
+            style={{
+              fontSize: '28px',
+              fontFamily: 'var(--font-sora)',
+              fontWeight: 300,
+              textTransform: 'uppercase',
+              color: '#1e1e1e',
+              lineHeight: 1.2,
+            }}
+          >
+            {block.title}
+          </h3>
+        )}
+        {block.paragraph && <PortableText value={block.paragraph} components={paragraphComponents} />}
+        <BlockButton buttonLabel={block.buttonLabel} buttonUrl={block.buttonUrl} />
+      </div>
+      {media.length > 0 && (
+        <div className="no-scrollbar flex flex-col gap-8 md:pr-2" style={columnStyle}>
+          {media.map((m) => <BlockMedia key={m._key} item={m} onOpen={onOpen} />)}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function ProjectContent({ project }: ProjectContentProps) {
   const contentBlocks = project.contentBlocks ?? []
-  const allMediaItems = contentBlocks.flatMap((b) => b.media ?? [])
+  const hasMedia = contentBlocks.some((b) => (b.media ?? []).length > 0)
+
+  // Every image/video on the page, in page order, for the fullscreen viewer
+  const viewerItems = contentBlocks
+    .flatMap((b) => b.media ?? [])
+    .filter((m) => (m.mediaType === 'image' || m.mediaType === 'video') && m.url)
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null)
+  const openViewer = (key: string) => {
+    const i = viewerItems.findIndex((m) => m._key === key)
+    if (i >= 0) setViewerIndex(i)
+  }
 
   // Scroll tracking for title scale — same mechanic as landing page hero text
   const [scrollY, setScrollY] = useState(0)
@@ -240,11 +413,11 @@ export function ProjectContent({ project }: ProjectContentProps) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Title scales 48→24px over first 200px of scroll, width scales proportionally
-  // so line breaks stay at the same words (same lockup), identical to landing page behavior
+  // Title scales 48→24px over first 200px of scroll, same mechanic as the landing page hero.
+  // It stays on one line: long titles shrink further to fit the viewport width.
   const scrollProgress = Math.min(scrollY / 200, 1)
   const titleSize = 48 - scrollProgress * 24          // 48 → 24
-  const titleWidth = Math.round(460 * (titleSize / 48)) // 460 → 230 (proportional)
+  const titleFit = `calc((100vw - 40px) / ${Math.max(project.title.length, 1) * 0.68})`
 
   // Measure sticky title section height so sidebar top tracks below it
   const titleSectionRef = useRef<HTMLElement>(null)
@@ -257,36 +430,6 @@ export function ProjectContent({ project }: ProjectContentProps) {
     ro.observe(titleSectionRef.current)
     return () => ro.disconnect()
   }, [])
-
-  // Measure left column height for media collage container
-  const leftColRef = useRef<HTMLDivElement>(null)
-  const [leftColHeight, setLeftColHeight] = useState(800)
-  useEffect(() => {
-    if (!leftColRef.current) return
-    const ro = new ResizeObserver(() => {
-      if (leftColRef.current) setLeftColHeight(leftColRef.current.offsetHeight)
-    })
-    ro.observe(leftColRef.current)
-    return () => ro.disconnect()
-  }, [])
-
-  // Random collage positions — computed after mount to avoid hydration mismatch
-  const [mediaPositions, setMediaPositions] = useState<MediaPos[] | null>(null)
-  useEffect(() => {
-    if (allMediaItems.length === 0) return
-    const n = allMediaItems.length
-    const positions: MediaPos[] = allMediaItems.map((_, i) => {
-      const zoneSize = 100 / n
-      const zoneStart = i * zoneSize
-      return {
-        left: 5 + Math.random() * 45,
-        top: zoneStart + Math.random() * zoneSize * 0.65,
-        width: 38 + Math.random() * 20,
-      }
-    })
-    setMediaPositions(positions)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allMediaItems.length])
 
   // Side nav items from blocks that have a title and are opted-in
   const navItems = useMemo(() => {
@@ -310,8 +453,10 @@ export function ProjectContent({ project }: ProjectContentProps) {
       >
         <h1
           style={{
-            maxWidth: `${titleWidth}px`,
-            fontSize: `${titleSize}px`,
+            fontSize: `min(${titleSize}px, ${titleFit})`,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
             fontFamily: 'var(--font-sora)',
             fontWeight: 300,
             textTransform: 'uppercase',
@@ -324,27 +469,39 @@ export function ProjectContent({ project }: ProjectContentProps) {
       </section>
 
       {/* ===== HERO SECTION: cover image centered below title ===== */}
-      <section className="flex justify-center px-6 pb-6">
+      <section className="relative flex justify-center px-6 pb-6">
+        {/* Desktop fallback when the page has no side menu: float in the open space under the title */}
+        {project.showUpdatingNotice !== false && navItems.length === 0 && (
+          <UpdatingNotice updatedAt={project._updatedAt} className="hidden md:flex absolute left-5 top-3 z-10" />
+        )}
         <div className="flex flex-col gap-[14px]" style={{ width: '916px', maxWidth: '100%' }}>
-          {/* Cover image / video — natural aspect ratio, scales to container width */}
-          {project.coverVideo ? (
-            <video
-              src={project.coverVideo}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-auto block"
-            />
-          ) : project.coverImage ? (
-            <img
-              src={project.coverImage}
-              alt={project.title}
-              className="w-full h-auto block"
-            />
-          ) : (
-            <div className="w-full bg-[#f1f1f1]" style={{ aspectRatio: '16/9' }} />
-          )}
+          {/* Cover image / video — natural aspect ratio. On desktop it sits at the bottom of a
+              block that is one viewport tall (minus nav + title) plus a small bleed, so it always
+              runs slightly past the bottom edge with open space above it. Title section ≈ 82px. */}
+          <div className="relative flex flex-col justify-end md:min-h-[calc(100vh_-_134px_+_6vh)]">
+            {/* Phones: no room beside the title, so a compact notice sits on the cover's top-left corner */}
+            {project.showUpdatingNotice !== false && (
+              <UpdatingNotice updatedAt={project._updatedAt} compact className="md:hidden absolute left-2 top-2 z-10" />
+            )}
+            {project.coverVideo ? (
+              <video
+                src={project.coverVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto block"
+              />
+            ) : project.coverImage ? (
+              <img
+                src={project.coverImage}
+                alt={project.title}
+                className="w-full h-auto block"
+              />
+            ) : (
+              <div className="w-full bg-[#f1f1f1]" style={{ aspectRatio: '16/9' }} />
+            )}
+          </div>
 
           {/* Metadata rows — same text style as homepage experience bars */}
           {project.metadata && project.metadata.length > 0 && (
@@ -366,7 +523,7 @@ export function ProjectContent({ project }: ProjectContentProps) {
       </section>
 
       {/* ===== CONTENT SECTION ===== */}
-      {(contentBlocks.length > 0 || allMediaItems.length > 0) && (
+      {(contentBlocks.length > 0 || hasMedia) && (
         <section className="flex">
           {/* Sticky sidebar: width = (100vw - 980px) / 2 so text aligns with cover image left edge.
               top = nav (52px) + measured sticky title height, so items never hide behind the title. */}
@@ -380,6 +537,9 @@ export function ProjectContent({ project }: ProjectContentProps) {
               }}
             >
               <SideNavigation items={navItems} showBackButton={false} scrollOffset={52 + titleSectionH + 12} />
+              {project.showUpdatingNotice !== false && (
+                <UpdatingNotice updatedAt={project._updatedAt} className="hidden md:flex mt-6 mr-3" />
+              )}
             </div>
           )}
 
@@ -391,73 +551,31 @@ export function ProjectContent({ project }: ProjectContentProps) {
             />
           )}
 
-          {/* Text content — starts at cover image left edge */}
+          {/* Sections — two-column grid starting at the cover image left edge */}
           <div
-            ref={leftColRef}
-            style={{ width: '560px', flexShrink: 0 }}
-            className="px-8 pt-3 pb-32 flex flex-col gap-24"
+            className="flex-1 min-w-0 px-8 pt-3 pb-32 flex flex-col gap-16"
+            style={{ ['--project-sticky-top' as string]: `${52 + titleSectionH + 12}px` }}
           >
             {contentBlocks.map((block, i) => (
               <React.Fragment key={block._key}>
-                <div
-                  id={`block-${block._key}`}
-                  className="scroll-mt-24 flex flex-col gap-4"
-                  style={{ minHeight: `calc(100vh - ${52 + titleSectionH + 12}px)` }}
-                >
-                  {block.title && (
-                    <h3
-                      style={{
-                        fontSize: '28px',
-                        fontFamily: 'var(--font-sora)',
-                        fontWeight: 300,
-                        textTransform: 'uppercase',
-                        color: '#1e1e1e',
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {block.title}
-                    </h3>
-                  )}
-                  {block.paragraph && (
-                    <PortableText
-                      value={block.paragraph}
-                      components={paragraphComponents}
-                    />
-                  )}
-                  <BlockButton
-                    buttonLabel={block.buttonLabel}
-                    buttonUrl={block.buttonUrl}
-                  />
+                <div id={`block-${block._key}`} className="scroll-mt-24">
+                  <BlockGrid block={block} onOpen={openViewer} />
                 </div>
                 {i < contentBlocks.length - 1 && (
-                  <div style={{
-                    marginLeft: 'calc((980px - 100vw) / 2 - 13px)',
-                    marginBottom: '-56px',
-                    width: 'calc(100vw - 40px)',
-                    height: '1px',
-                    background: '#1e1e1e',
-                    flexShrink: 0,
-                  }} />
+                  <div style={{ marginLeft: '-32px', marginRight: '-20px', height: '1px', background: '#1e1e1e' }} />
                 )}
               </React.Fragment>
             ))}
           </div>
-
-          {/* Media collage — fills remaining width to the right */}
-          {allMediaItems.length > 0 && (
-            <div
-              className="flex-1 relative"
-              style={{ height: leftColHeight }}
-            >
-              {(mediaPositions ?? []).map((pos, i) => {
-                const item = allMediaItems[i]
-                if (!item) return null
-                return <CollageMedia key={item._key} item={item} pos={pos} />
-              })}
-            </div>
-          )}
         </section>
       )}
+
+      <MediaViewer
+        items={viewerItems}
+        index={viewerIndex}
+        onIndex={setViewerIndex}
+        onClose={() => setViewerIndex(null)}
+      />
     </div>
   )
 }
