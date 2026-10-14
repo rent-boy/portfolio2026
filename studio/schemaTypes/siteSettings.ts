@@ -61,6 +61,13 @@ export default defineType({
       options: { hotspot: true },
     },
     {
+      name: 'showUpdatingNotice',
+      title: 'Show "content being updated" notice on the homepage',
+      type: 'boolean',
+      description: 'Shown above the bottom bar, with the date any project or homepage content was last edited',
+      initialValue: true,
+    },
+    {
       name: 'bottomBarText',
       title: 'Bottom Bar Text',
       type: 'string',

@@ -60,6 +60,7 @@ const projectProjection = `{
     title,
     subtitle,
     slug,
+    visible,
     isOpen,
     "thumbnailImage": coverImage.asset->url,
     "thumbnailLightColor": coverImage.asset->metadata.palette.lightMuted.background,
@@ -143,6 +144,8 @@ export async function getSiteSettings() {
     cvButtonText,
     cvButtonUrl,
     bottomBarText,
+    showUpdatingNotice,
+    "contentUpdatedAt": *[_type in ["workProject", "homePage"]] | order(_updatedAt desc)[0]._updatedAt,
     ogTitle,
     "ogImageUrl": ogImage.asset->url
   }`

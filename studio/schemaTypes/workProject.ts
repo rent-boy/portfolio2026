@@ -32,32 +32,35 @@ export default defineType({
     },
     {
       name: 'visible',
-      title: 'Visible',
+      title: 'Visible on homepage',
       type: 'boolean',
-      description: 'Make this project visible on the site',
+      description: 'Show this project on the homepage. When off, the project is hidden everywhere and its page cannot be opened.',
       initialValue: true,
     },
     {
       name: 'isOpen',
-      title: 'Open to visitors',
+      title: 'Open project page',
       type: 'boolean',
-      description: 'When off, project appears on the landing page but is not clickable and its page is inaccessible',
+      description: 'When off, the tile shows on the homepage but is not clickable and the project page cannot be opened.',
       initialValue: true,
-    },
-    {
-      name: 'showUpdatingNotice',
-      title: 'Show "content being updated" notice',
-      type: 'boolean',
-      description: 'Small notice under the project title with the date this project was last edited',
-      initialValue: true,
+      // Only meaningful while the project is on the homepage
+      hidden: ({ parent }: { parent: { visible?: boolean } }) => parent?.visible === false,
     },
     {
       name: 'closedProjectUrl',
       title: 'External link (closed projects only)',
       type: 'url',
       description: 'Optional — if set, clicking the tile opens this URL instead of the project page. Leave empty to keep the tile non-clickable.',
-      hidden: ({ parent }: { parent: { isOpen?: boolean } }) => parent?.isOpen !== false,
+      hidden: ({ parent }: { parent: { visible?: boolean; isOpen?: boolean } }) =>
+        parent?.visible === false || parent?.isOpen !== false,
       validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }),
+    },
+    {
+      name: 'showUpdatingNotice',
+      title: 'Show "content being updated" notice',
+      type: 'boolean',
+      description: 'Small notice at the bottom of the project page side menu, with the date this project was last edited',
+      initialValue: true,
     },
     {
       name: 'assignedBar',

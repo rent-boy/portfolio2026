@@ -415,12 +415,15 @@ export function WorkFilterSection({
   profileImageUrl,
   heroText,
   experienceEntries,
+  updatingNoticeShown = false,
   children,
 }: {
   projects: Project[]
   profileImageUrl?: string
   heroText?: string
   experienceEntries?: ExperienceEntry[]
+  // Phones: the "content being updated" notice sits above the bottom bar, so lift the photo clear of it
+  updatingNoticeShown?: boolean
   children?: React.ReactNode
 }) {
   const entries = experienceEntries ?? []
@@ -561,7 +564,7 @@ export function WorkFilterSection({
 
       {/* Profile image — desktop only, bottom-right aligned with bar text (px-5 = 20px) */}
       {profileImageUrl && (
-        <div className="absolute z-[49] bottom-8 md:bottom-[18px] left-[12px] right-[12px] md:left-auto md:right-5 md:w-fit">
+        <div className={`absolute z-[49] ${updatingNoticeShown ? 'bottom-[92px]' : 'bottom-8'} md:bottom-[18px] left-[12px] right-[12px] md:left-auto md:right-5 md:w-fit`}>
           <img
             src={profileImageUrl}
             alt="Profile"

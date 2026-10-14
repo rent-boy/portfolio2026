@@ -15,7 +15,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ projec
   const { projectId } = await params
   const project = await getWorkProjectBySlug(projectId)
 
-  if (!project || project.isOpen === false) {
+  // Hidden from the homepage, or shown but closed: no project page
+  if (!project || project.visible === false || project.isOpen === false) {
     notFound()
   }
 
